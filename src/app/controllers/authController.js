@@ -9,7 +9,6 @@ require('dotenv').config();
 const authDao = require('../dao/authDao');
 
 var twilio=require('twilio');
-const { CodeGuruProfiler } = require('aws-sdk');
 var client=new twilio(process.env.ACCOUNT_SID,process.env.AUTH_TOKEN);
 var phoneNumberMap=new Map();
 
@@ -75,16 +74,27 @@ exports.signUp = async(req, res)=> {
             message:"핸드폰 번호를 입력해주세요"
         })
     }
-
-    var regexp=/[^0-9,+]/g;
-    var regres=phoneNumber.search(regexp);
-    if(regres!=-1){
+    
+    if(typeof(phoneNumber)!='string'){
         return res.json({
             code:411,
             isSuccess:false,
-            message:"핸드폰 번호는 숫자입니다"
+            message:"핸드폰 번호는 숫자문자열입니다"
         })
     }
+    else{
+        var regexp=/[^0-9]/g;
+        var regres=phoneNumber.search(regexp);
+        if(regres!=-1){
+            return res.json({
+                code:411,
+                isSuccess:false,
+                message:"핸드폰 번호는 숫자문자열입니다"
+            })
+        }
+    }
+
+   
 
     if(!req.file||!req.file.location){
         return res.json({
@@ -250,22 +260,26 @@ exports.sendNumber=async(req,res)=>{
         return res.json({
             code:411,
             isSuccess:false,
-            message:"핸드폰 번호는 문자열입니다"
+            message:"핸드폰 번호는 숫자문자열입니다"
         })
+    }
+    else{
+        var regexp=/[^0-9]/g;
+        var regres=phoneNumber.search(regexp);
+        if(regres!=-1){
+            return res.json({
+                code:411,
+                isSuccess:false,
+                message:"핸드폰 번호는 숫자문자열입니다"
+            })
+        }
     }
 
-    var regexp=/[^0-9,+]/g;
-    var regres=phoneNumber.search(regexp);
-    if(regres!=-1){
-        return res.json({
-            code:412,
-            isSuccess:false,
-            message:"핸드폰 번호는 숫자와 + 입니다"
-        })
-    }
 
 
     try{
+
+        phoneNumber='+82'+phoneNumber.substr(1);
 
         var randomNumber=Math.floor(Math.random()*9000)+1000;
         phoneNumberMap.set(phoneNumber,randomNumber);
@@ -307,16 +321,26 @@ exports.checkNumber=async(req,res)=>{
         })
     }
 
-    var regexp=/[^0-9,+]/g;
-    var regres=phoneNumber.search(regexp);
-    if(regres!=-1){
+    if(typeof(phoneNumber)!='string'){
         return res.json({
             code:411,
             isSuccess:false,
             message:"핸드폰 번호는 숫자문자열입니다"
         })
     }
+    else{
+        var regexp=/[^0-9]/g;
+        var regres=phoneNumber.search(regexp);
+        if(regres!=-1){
+            return res.json({
+                code:411,
+                isSuccess:false,
+                message:"핸드폰 번호는 숫자문자열입니다"
+            })
+        }
+    }
 
+    phoneNumber='+82'+phoneNumber.substr(1);
 
     if(!code){
         return res.json({
