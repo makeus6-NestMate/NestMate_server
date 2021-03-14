@@ -17,6 +17,7 @@ module.exports = function () {
     app.use(cors());
    
     require('../src/app/routes/authRoute')(app);
+    require('../src/app/routes/roomRoute')(app);
 
     return app;
 };

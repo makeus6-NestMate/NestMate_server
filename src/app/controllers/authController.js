@@ -139,8 +139,6 @@ exports.signUp = async(req, res)=> {
 
         await authDao.insertUserInfo(email,hashedPassword,name,phoneNumber,profileImg,nickname);
 
-
-
         return res.json({
             isSuccess: true,
             code: 200,
@@ -425,7 +423,7 @@ exports.checkEmail=async(req,res)=>{
 
         const userByEmail=await authDao.selectUserByEmail(email);
 
-        if(userByEmail.length>1){
+        if(userByEmail.length>0){
             return res.json({
                 isSuccess:true,
                 message:'중복된 이메일입니다',

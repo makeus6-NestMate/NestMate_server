@@ -8,6 +8,15 @@ exports.selectUserByEmail=(email)=>{
   return fun1(query,param);
 }
 
+exports.selectUserById=(id)=>{
+  const query=`
+    SELECT * FROM User WHERE id=?;
+  `;
+  const param=[id];
+  return fun1(query,param);
+}
+
+
 exports.insertUserInfo=(email,hashedPassword,name,phoneNumber,profileImg,nickname)=>{
   const query= `
     INSERT INTO User(email,password,name,phoneNumber,profileImg,nickname,prizeCount) VALUES(?,?,?,?,?,?,0);
