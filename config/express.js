@@ -17,11 +17,12 @@ module.exports = function () {
     app.use(cors());
 
     app.get('/',(req,res)=>{
-        return res.send('hello');
+        return res.send('hello developers');
     })
    
     require('../src/app/routes/authRoute')(app);
     require('../src/app/routes/roomRoute')(app);
+    require('../src/app/routes/todoRoute')(app);
 
     return app;
 };

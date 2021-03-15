@@ -12,9 +12,6 @@ var twilio=require('twilio');
 var client=new twilio(process.env.ACCOUNT_SID,process.env.AUTH_TOKEN);
 var phoneNumberMap=new Map();
 
-exports.test=(req,res)=>{
-    return res.send('auth successs');
-}
 
 exports.signUp = async(req, res)=> {
 

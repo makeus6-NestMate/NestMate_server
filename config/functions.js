@@ -7,7 +7,7 @@ exports.fun1=async(query,param)=>{
         query,
         param
       );
-    
+    await connection.release();
     return result;
 }
 
