@@ -15,6 +15,10 @@ module.exports = function () {
     app.use(methodOverride());
 
     app.use(cors());
+
+    app.get('/',(req,res)=>{
+        return res.send('hello');
+    })
    
     require('../src/app/routes/authRoute')(app);
     require('../src/app/routes/roomRoute')(app);
