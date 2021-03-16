@@ -10,7 +10,28 @@ exports.createDayTodo=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {todo,deadline,roomId}=req.body;
+    const {todo,roomId,year,month,day,hour,minute}=req.body;
+
+    if(!year||!month||!day||!hour||!minute){
+        return res.json({
+            isSuccess:false,
+            message:'마감날짜를 각각 입력해주세요',
+            code:438
+        })
+    }
+    const deadline=new Date(year,month,day,hour,minute);
+
+    if(typeof(year)!='number'||typeof(month)!='number'||typeof(day)!='number'
+    ||typeof(hour)!='number'||typeof(minute)!='number'){
+        return res.json({
+            isSuccess:false,
+            message:'마감날짜는 각각 숫자입니다',
+            code:439
+        })
+    }
+
+
+    
 
     if(!todo){
         return res.json({
@@ -34,7 +55,7 @@ exports.createDayTodo=async(req,res)=>{
         })
     }
 
-    if(typeof(room)!='number'){
+    if(typeof(roomId)!='number'){
         return res.json({
             isSuccess:false,
             message:'방 아이디는 숫자입니다',
@@ -42,13 +63,9 @@ exports.createDayTodo=async(req,res)=>{
         })
     }
 
-    if(!deadline){
-        return res.json({
-            isSuccess:false,
-            message:'마감날짜를 입려해주세요',
-            code:438
-        })
-    }
+
+
+    const connection = await pool.getConnection(async conn => conn);
 
     try{
 
@@ -72,20 +89,68 @@ exports.createDayTodo=async(req,res)=>{
             })
         }
 
+        await connection.beginTransaction();
+
+
+
+        const query1= `
+        INSERT INTO Todo(todo,isRepeat,roomId) VALUES(?,?,?);
+        `;
+        const param1=[todo,'N',roomId];
+        await connection.query(
+            query1,
+            param1
+        );
+
+        const query2= `
+        SELECT MAX(id) AS maxId FROM Todo;
+        `;
+        const param2=[];
+        const [[todoId]]=await connection.query(
+            query2,
+            param2
+        );
+
+
+        const query3= `
+        INSERT INTO TodoTime(todoId,deadline) VALUES(?,?)
+        `;
+        const param3=[todoId.maxId,deadline];
+        await connection.query(
+            query3,
+            param3
+        );
+
+
+
+        const query4= `
+        INSERT INTO TodoUser(userId,todoId) VALUES(?,?);
+        `;
+        const param4=[userId,todoId.maxId];
+        await connection.query(
+            query4,
+            param4
+        );
+
+        
+
+        await connection.commit();
+        await connection.release();
+
 
         
         return res.json({
             isSuccess: true,
             code: 200,
-            message: "하루 할일 추가 성공",
-            result:{
-                roomInfo:roomInfo
-            }
+            message: "하루 할일 추가 성공"
         });
 
 
     }
     catch(err){
+
+        await connection.rollback();
+        await connection.release();
     
         logger.error(`하루 할일 추가 실패\n: ${err.message}`);
         return res.json({

@@ -129,7 +129,7 @@ exports.signUp = async(req, res)=> {
 
         const userByEmail=await authDao.selectUserByEmail(email);
 
-        if(userByEmail.length>1){
+        if(userByEmail.length>0){
             return res.json({
                 isSuccess:true,
                 message:'중복된 이메일입니다',
@@ -275,9 +275,19 @@ exports.sendNumber=async(req,res)=>{
         }
     }
 
-
-
+    
     try{
+        const phone=await authDao.selectUserByPhone(phoneNumber);
+
+        if(phone.length>0){
+            return res.json({
+                code:409,
+                isSuccess:false,
+                message:"이미 등록되어있는 핸드폰번호입니다"
+            })
+        }
+
+
 
         phoneNumber='+82'+phoneNumber.substr(1);
 

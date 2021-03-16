@@ -24,3 +24,11 @@ exports.insertUserInfo=(email,hashedPassword,name,phoneNumber,profileImg,nicknam
   const param=[email,hashedPassword,name,phoneNumber,profileImg,nickname];
   return fun1(query,param);
 }
+
+exports.selectUserByPhone=(phoneNumber)=>{
+  const query=`
+    SELECT * FROM User WHERE phoneNumber=?;
+  `;
+  const param=[phoneNumber];
+  return fun1(query,param);
+}

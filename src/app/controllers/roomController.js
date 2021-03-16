@@ -244,7 +244,8 @@ exports.getRoom=async(req,res)=>{
             code: 200,
             message: "둥지 조회 성공",
             result:{
-                roomInfo:roomInfo
+                roomInfo:roomInfo,
+                userName:user[0].nickname
             }
         });
 
