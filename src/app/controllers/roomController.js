@@ -125,10 +125,27 @@ exports.createRoom = async(req, res)=> {
 
 exports.enterRoom = async(req, res)=> {
     const {
-        roomId
+        email
     } = req.body;
 
+    let roomId=req.params.roomId;
     const userId=req.verifiedToken.id;
+
+    if (!email){
+        return res.json({
+            isSuccess: false, 
+            code: 416, 
+            message: "이메일을 입력해주세요."
+        });
+    }
+
+    if (!regexEmail.test(email)){
+        return res.json({
+            isSuccess: false,
+            code:417,
+            message: "이메일을 형식을 지켜주세요"
+        });
+    }
 
     if(!roomId){
         return res.json({
@@ -138,13 +155,18 @@ exports.enterRoom = async(req, res)=> {
         })
     }
 
-    if(typeof(room)!='number'){
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
         return res.json({
+            code:434,
             isSuccess:false,
-            message:'방 아이디는 숫자입니다',
-            code:434
+            message:"방 아이디는 숫자입니다"
         })
     }
+    roomId=Number(roomId);
+
 
     try{
 
@@ -167,8 +189,17 @@ exports.enterRoom = async(req, res)=> {
                 code:432
             })
         }
-  
-        const roomUser=await roomDao.selectRoomUser(roomId,userId);
+
+        const user=await authDao.selectUserByEmail(email);
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 유저입니다',
+                code:436
+            })
+        }
+
+        const roomUser=await roomDao.selectRoomUser(roomId,user[0].id);
         if(roomUser.length>0){
             return res.json({
                 isSuccess:false,
@@ -185,14 +216,14 @@ exports.enterRoom = async(req, res)=> {
         return res.json({
             isSuccess: true,
             code: 200,
-            message: "둥지 입장 성공"
+            message: "둥지 초대 성공"
         });
 
 
     }
     catch(err){
     
-        logger.error(`둥지 입장 실패\n: ${err.message}`);
+        logger.error(`둥지 초대 실패\n: ${err.message}`);
         return res.json({
             message:err.message,
             code:500,
@@ -203,9 +234,32 @@ exports.enterRoom = async(req, res)=> {
 };
 
 
-exports.getRoom=async(req,res)=>{
+exports.leaveRoom=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+    const connection = await pool.getConnection(async conn => conn);
 
     try{
 
@@ -220,11 +274,87 @@ exports.getRoom=async(req,res)=>{
             })
         }
 
-        var roomInfo=[];
+        await connection.beginTransaction();
+
+        const query1= `
+        DELETE FROM RoomUser WHERE roomId=? AND userId=?
+        `;
+        const param1=[roomId,userId];
+        await connection.query(
+            query1,
+            param1
+        );
+
+        const query2= `
+        SELECT * FROM RoomUser WHERE roomId=?
+        `;
+        const param2=[roomId];
+        const [room]=await connection.query(
+            query2,
+            param2
+        );
+
+        if(room.length<1){
+
+            const query3= `
+            DELETE FROM Room WHERE id=?
+            `;
+            const param3=[roomId];
+            await connection.query(
+                query3,
+                param3
+            );
+        }
+
+            
+        await connection.commit();
+        await connection.release();
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "둥지 나가기 성공",
+        });
+
+
+    }
+    catch(err){
+        await connection.rollback();
+        await connection.release();
+    
+        logger.error(`둥지 나가기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+exports.getRoom=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+
+        let roomInfo=[];
         
         const rooms=await roomDao.selectRoomByUser(userId);
-        for(var _ of rooms){
-            var ob={};
+        for(let _ of rooms){
+            let ob={};
             ob.roomName=_.name;
             ob.roomColor=_.color;
             const users=await roomDao.selectUserInfo(_.id);
@@ -261,3 +391,4 @@ exports.getRoom=async(req,res)=>{
         });
     }
 }
+
