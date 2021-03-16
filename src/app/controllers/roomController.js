@@ -190,8 +190,8 @@ exports.enterRoom = async(req, res)=> {
             })
         }
 
-        const user=await authDao.selectUserByEmail(email);
-        if(user.length<1){
+        const userEmail=await authDao.selectUserByEmail(email);
+        if(userEmail.length<1){
             return res.json({
                 isSuccess:false,
                 message:'없는 유저입니다',
