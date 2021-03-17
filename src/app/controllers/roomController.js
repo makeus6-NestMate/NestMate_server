@@ -355,6 +355,7 @@ exports.getRoom=async(req,res)=>{
         const rooms=await roomDao.selectRoomByUser(userId);
         for(let _ of rooms){
             let ob={};
+            ob.roomId=_.id;
             ob.roomName=_.name;
             ob.roomColor=_.color;
             const users=await roomDao.selectUserInfo(_.id);
