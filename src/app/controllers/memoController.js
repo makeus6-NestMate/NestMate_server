@@ -11,7 +11,7 @@ exports.createDayTodo=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {memo,memoColor,width,hegith,x,y}=req.body;
+    const {memo,memoColor,width,height,x,y}=req.body;
 
     let roomId=req.params.roomId;
     

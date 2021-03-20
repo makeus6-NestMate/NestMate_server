@@ -110,9 +110,9 @@ exports.createDayTodo=async(req,res)=>{
 
 
         const query1= `
-        INSERT INTO Todo(todo,isRepeat,roomId) VALUES(?,?,?);
+        INSERT INTO Todo(todo,isRepeat,roomId,userId) VALUES(?,?,?,?);
         `;
-        const param1=[todo,'N',roomId];
+        const param1=[todo,'N',roomId,userId];
         await connection.query(
             query1,
             param1
@@ -139,14 +139,6 @@ exports.createDayTodo=async(req,res)=>{
 
 
 
-        const query4= `
-        INSERT INTO TodoUser(userId,todoId) VALUES(?,?);
-        `;
-        const param4=[userId,todoId.maxId];
-        await connection.query(
-            query4,
-            param4
-        );
 
         
 
@@ -309,9 +301,9 @@ exports.createDaysTodo=async(req,res)=>{
 
 
         const query1= `
-        INSERT INTO Todo(todo,isRepeat,roomId) VALUES(?,?,?);
+        INSERT INTO Todo(todo,isRepeat,roomId,userId) VALUES(?,?,?,?);
         `;
-        const param1=[todo,'Y',roomId];
+        const param1=[todo,'Y',roomId,userId];
         await connection.query(
             query1,
             param1
@@ -336,16 +328,6 @@ exports.createDaysTodo=async(req,res)=>{
             param3
         );
 
-
-
-        const query4= `
-        INSERT INTO TodoUser(userId,todoId) VALUES(?,?);
-        `;
-        const param4=[userId,todoId.maxId];
-        await connection.query(
-            query4,
-            param4
-        );
 
         for(let i=0;i<days.length;i++){
             if(days[i]!='1') continue;
