@@ -423,24 +423,20 @@ exports.getDayTodo=async(req,res)=>{
             })
         }
 
-        const todo=await todoDao.selectDayTodo(roomId);
+        let todo=await todoDao.selectDayTodo(roomId);
 
         for(let _ of todo){
-
-            let todoId=_.id;
-            delete _.id;
-            _.todoId=todoId;
-    
-            let time=moment(_.deadline).utc().format('MM/DD/HH/mm');
-            delete _.deadline;
-            _.deadline=time;
+          
+            _.deadline=moment(_.deadline).format('MM/DD/HH/mm');
         }
 
         return res.json({
             isSuccess: true,
             code: 200,
             message: "하루 할일 조회 성공",
-            todo:todo
+            result:{
+                todo:todo
+            }
         });
 
 
@@ -461,6 +457,7 @@ exports.getDayTodo=async(req,res)=>{
 
 
 exports.getDaysTodo=async(req,res)=>{
+    
     
     const userId=req.verifiedToken.id;
 
@@ -513,19 +510,15 @@ exports.getDaysTodo=async(req,res)=>{
 
         for(let _ of todo){
             
-            let todoId=_.id;
-            delete _.id;
-            _.todoId=todoId;
     
             let time=_.deadline.split(':');
             _.deadline=time[0]+'/'+time[1];
 
-            const days=await todoDao.selectDays(todoId);
-
+            let days=await todoDao.selectDays(todo[0].todoId);
             let day='0000000';
          
             for(let _ of days){
-                console.log(_.day);
+              
                 if(_.day==0) day='1'+day.substr(1);
                 else if(_.day==1) day=day.substr(0,1)+'1'+day.substr(2);
                 else if(_.day==2) day=day.substr(0,2)+'1'+day.substr(3);
@@ -542,7 +535,9 @@ exports.getDaysTodo=async(req,res)=>{
             isSuccess: true,
             code: 200,
             message: "반복 할일 조회 성공",
-            todo:todo
+            result:{
+                todo:todo
+            }
         });
 
 
@@ -643,6 +638,13 @@ exports.deleteDayTodo=async(req,res)=>{
                 code:445
             })
         }
+        if(todo[0].userId!=userId){
+            return res.json({
+                isSuccess:false,
+                message:'작성자 권한입니다',
+                code:458
+            })
+        }
 
         await connection.beginTransaction();
 
@@ -675,8 +677,7 @@ exports.deleteDayTodo=async(req,res)=>{
         return res.json({
             isSuccess: true,
             code: 200,
-            message: "하루 할일 삭제 성공",
-            todo:todo
+            message: "하루 할일 삭제 성공"
         });
 
 
@@ -778,7 +779,13 @@ exports.deleteDaysTodo=async(req,res)=>{
                 code:445
             })
         }
-
+        if(todo[0].userId!=userId){
+            return res.json({
+                isSuccess:false,
+                message:'작성자 권한입니다',
+                code:458
+            })
+        }
 
 
         await connection.beginTransaction();
@@ -821,8 +828,7 @@ exports.deleteDaysTodo=async(req,res)=>{
         return res.json({
             isSuccess: true,
             code: 200,
-            message: "반복 할일 삭제 성공",
-            todo:todo
+            message: "반복 할일 삭제 성공"
         });
 
 
@@ -966,7 +972,13 @@ exports.updateDayTodo=async(req,res)=>{
                 code:445
             })
         }
-
+        if(todos[0].userId!=userId){
+            return res.json({
+                isSuccess:false,
+                message:'작성자 권한입니다',
+                code:458
+            })
+        }
 
         await connection.beginTransaction();
 
@@ -1170,6 +1182,13 @@ exports.updateDaysTodo=async(req,res)=>{
             })
         }
 
+        if(todos[0].userId!=userId){
+            return res.json({
+                isSuccess:false,
+                message:'작성자 권한입니다',
+                code:458
+            })
+        }
 
         await connection.beginTransaction();
 

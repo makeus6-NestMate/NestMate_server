@@ -2,7 +2,7 @@ const {fun1}=require('../../../config/functions');
 
 exports.selectDayTodo=(roomId)=>{
     const query=`
-    SELECT Todo.id,todo,deadline
+    SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
     WHERE Todo.roomId=? AND deadline>=NOW();
     `
@@ -12,7 +12,7 @@ exports.selectDayTodo=(roomId)=>{
 
 exports.selectDaysTodo=(roomId)=>{
     const query=`
-    SELECT Todo.id,todo,deadline
+    SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     WHERE Todo.roomId=? 
     `
