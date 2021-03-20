@@ -38,11 +38,11 @@ exports.selectRoom=(roomId)=>{
   return fun1(query,param); 
 };
 
-exports.insertMember=(roomId,userId)=>{
+exports.insertMember=(roomId,userId,isPresident)=>{
   const query=`
-  INSERT INTO RoomUser(roomId,userId) VALUES(?,?);
+  INSERT INTO RoomUser(roomId,userId,isPresident) VALUES(?,?,?);
   `
-  const param=[roomId,userId];
+  const param=[roomId,userId,isPresident];
   return fun1(query,param); 
 };
 

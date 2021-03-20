@@ -23,6 +23,7 @@ module.exports = function () {
     require('../src/app/routes/authRoute')(app);
     require('../src/app/routes/roomRoute')(app);
     require('../src/app/routes/todoRoute')(app);
+    require('../src/app/routes/memoRoute')(app);
 
     return app;
 };

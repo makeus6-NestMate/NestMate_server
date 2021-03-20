@@ -89,9 +89,9 @@ exports.createRoom = async(req, res)=> {
 
 
         const query3= `
-        INSERT INTO RoomUser(roomId,userId) VALUES(?,?);
+        INSERT INTO RoomUser(roomId,userId,isPresident) VALUES(?,?,?);
         `;
-        const param3=[roomId.maxId,userId];
+        const param3=[roomId.maxId,userId,'Y'];
         await connection.query(
             query3,
             param3
@@ -211,7 +211,7 @@ exports.enterRoom = async(req, res)=> {
 
 
 
-        await roomDao.insertMember(roomId,userId);
+        await roomDao.insertMember(roomId,userId,'N');
         
         return res.json({
             isSuccess: true,
