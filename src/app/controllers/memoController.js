@@ -12,7 +12,7 @@ exports.createMemo=async(req,res)=>{
 
     const userId=req.verifiedToken.id;
     
-    const {memo,memoColor,width,height,x,y}=req.body;
+    const {memo,memoColor,x,y}=req.body;
 
     let roomId=req.params.roomId;
     
@@ -63,38 +63,10 @@ exports.createMemo=async(req,res)=>{
             code:449
         })
     }
-    if(!width){
-        return res.json({
-            isSuccess:false,
-            message:'가로길이를 입력해주세요',
-            code:450
-        })
-    }
-    if(typeof(width)!='number'){
-        return res.json({
-            isSuccess:false,
-            message:'가로길이는 숫자입니다',
-            code:451
-        })
-    }
-    if(!height){
-        return res.json({
-            isSuccess:false,
-            message:'세로길이를 입력해주세요',
-            code:452
-        })
-    }
-    if(typeof(height)!='number'){
-        return res.json({
-            isSuccess:false,
-            message:'세로길이는 숫자입니다',
-            code:453
-        })
-    }
+ 
 
-    console.log(x);
-    console.log(typeof(x));
-    if(!x){
+    
+    if(x===undefined||x===null){
         return res.json({
             isSuccess:false,
             message:'위치의 x좌표를 입력해주세요',
@@ -109,7 +81,7 @@ exports.createMemo=async(req,res)=>{
             code:455
         })
     }
-    if(!y){
+    if(y===undefined||y===null){
         return res.json({
             isSuccess:false,
             message:'세로길이를 입력해주세요',
@@ -148,7 +120,7 @@ exports.createMemo=async(req,res)=>{
             })
         }
 
-        await memoDao.insertMemo(memo,memoColor,width,height,x,y,userId,roomId);
+        await memoDao.insertMemo(memo,memoColor,x,y,userId,roomId);
 
         return res.json({
             isSuccess: true,
@@ -264,7 +236,7 @@ exports.updateMemo=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {memo,memoColor,width,height}=req.body;
+    const {memo,memoColor}=req.body;
 
     let roomId=req.params.roomId;
     let memoId=req.params.memoId;
@@ -298,35 +270,7 @@ exports.updateMemo=async(req,res)=>{
             code:449
         })
     }
-    if(!width){
-        return res.json({
-            isSuccess:false,
-            message:'가로길이를 입력해주세요',
-            code:450
-        })
-    }
-    if(typeof(width)!='number'){
-        return res.json({
-            isSuccess:false,
-            message:'가로길이는 숫자입니다',
-            code:451
-        })
-    }
-    if(!height){
-        return res.json({
-            isSuccess:false,
-            message:'세로길이를 입력해주세요',
-            code:452
-        })
-    }
-    if(typeof(height)!='number'){
-        return res.json({
-            isSuccess:false,
-            message:'세로길이는 숫자입니다',
-            code:453
-        })
-    }
-    
+  
     if(!roomId){
         return res.json({
             isSuccess:false,
@@ -406,7 +350,7 @@ exports.updateMemo=async(req,res)=>{
             })
         }
 
-        await memoDao.updateMemo(memoId,memo,memoColor,width,height);
+        await memoDao.updateMemo(memoId,memo,memoColor);
 
 
         
