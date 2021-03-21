@@ -9,9 +9,9 @@ const moment=require('moment');
 
 exports.createMemo=async(req,res)=>{
     
-    console.log('aa');
+
     const userId=req.verifiedToken.id;
-    console.log('bb');
+    
     const {memo,memoColor,width,height,x,y}=req.body;
 
     let roomId=req.params.roomId;
@@ -92,6 +92,8 @@ exports.createMemo=async(req,res)=>{
         })
     }
 
+    console.log(x);
+    console.log(typeof(x));
     if(!x){
         return res.json({
             isSuccess:false,
@@ -99,6 +101,7 @@ exports.createMemo=async(req,res)=>{
             code:454
         })
     }
+    
     if(typeof(x)!='number'){
         return res.json({
             isSuccess:false,
