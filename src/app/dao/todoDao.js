@@ -32,7 +32,7 @@ exports.selectDays=(todoId)=>{
 
 exports.selectTodo=(todoId)=>{
     const query=`
-    SELECT id
+    SELECT *
     FROM Todo
     WHERE id=?
     `
