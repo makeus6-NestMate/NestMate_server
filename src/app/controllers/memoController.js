@@ -489,3 +489,149 @@ exports.deleteMemo=async(req,res)=>{
         });
     }
 }
+
+
+
+exports.moveMemo=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    let memoId=req.params.memoId;
+    
+    const {x,y}=req.body;
+  
+      
+    if(x===undefined||x===null){
+        return res.json({
+            isSuccess:false,
+            message:'위치의 x좌표를 입력해주세요',
+            code:454
+        })
+    }
+    
+    if(typeof(x)!='number'){
+        return res.json({
+            isSuccess:false,
+            message:'위치의 x좌표는 숫자입니다',
+            code:455
+        })
+    }
+    if(y===undefined||y===null){
+        return res.json({
+            isSuccess:false,
+            message:'세로길이를 입력해주세요',
+            code:456
+        })
+    }
+    if(typeof(y)!='number'){
+        return res.json({
+            isSuccess:false,
+            message:'세로길이는 숫자입니다',
+            code:457
+        })
+    }
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+    if(!memoId){
+        return res.json({
+            isSuccess:false,
+            message:'메모 아이디를 입력해주세요',
+            code:458
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=memoId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:459,
+            isSuccess:false,
+            message:"메모 아이디는 숫자입니다"
+        })
+    }
+    memoId=Number(memoId);
+
+
+
+
+    try{
+
+      
+        const user=await authDao.selectUserById(userId);
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        let memo=await memoDao.selectMemoById(memoId);
+
+        if(memo.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 메모 아이디입니다',
+                code:460
+            })
+        }
+        if(memo[0].userId!=userId){
+            return res.json({
+                isSuccess:false,
+                message:'권한이 없습니다',
+                code:458
+            })
+        }
+
+        await memoDao.moveMemo(memoId,x,y);
+
+
+        
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "메모 이동 성공"
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`메모 이동  실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}

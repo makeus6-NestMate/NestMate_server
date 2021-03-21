@@ -6,4 +6,5 @@ module.exports = function(app){
     app.get('/room/:roomId/memo',verify,memo.getMemo);
     app.put('/room/:roomId/memo/:memoId',verify,memo.updateMemo);
     app.delete('/room/:roomId/memo/:memoId',verify,memo.deleteMemo);
+    app.patch('/room/:roomId/memo/:memoId',verify,memo.moveMemo);
 };

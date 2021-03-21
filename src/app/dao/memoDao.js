@@ -46,3 +46,10 @@ exports.deleteMemo=(memoId)=>{
 };
 
 
+exports.moveMemo=(memoId,x,y)=>{
+    const query=`
+    UPDATE Memo SET x=?, y=? WHERE id=?
+    `
+    const param=[x,y,memoId];
+    return fun1(query,param); 
+};
