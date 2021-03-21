@@ -11,7 +11,7 @@ exports.insertMemo=(memo,memoColor,x,y,userId,roomId)=>{
 exports.selectMemo=(roomId)=>{
     const query=`
     SELECT Memo.id AS memoId,profileImg,Memo.createdAt,Memo.memo,Memo.memoColor,
-    Memo.width,Memo.height,Memo.x,Memo.y
+    Memo.x,Memo.y
     FROM Memo INNER JOIN User ON Memo.userId=User.id
     WHERE Memo.roomId=?
     `
