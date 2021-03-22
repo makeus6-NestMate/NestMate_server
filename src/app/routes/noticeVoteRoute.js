@@ -5,9 +5,9 @@ module.exports = function(app){
    app.post('/room/:roomId/notice',verify,noticeVote.postNotice);
    app.post('/room/:roomId/vote',verify,noticeVote.posttVote);
 
-   /*app.put('/room/:roomId/notice/:noticeId',verify,noticeVote.updateNotice);
+   app.put('/room/:roomId/notice/:noticeId',verify,noticeVote.updateNotice);
    app.put('/room/:roomId/vote/:voteId',verify,noticeVote.updateVote);
-
+/*
    app.delete('/room/:roomId/notice/:noticeId',verify,noticeVote.deleteNotice);
    app.delete('/room/:roomId/vote/:voteId',verify,noticeVote.deleteVote);
 
