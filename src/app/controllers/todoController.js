@@ -198,7 +198,7 @@ exports.createDaysTodo=async(req,res)=>{
     }
     let cnt=0;
     for(let _ of time){
-        if(_===':') cnt++;
+        if(_==='/') cnt++;
     }
     if(cnt!=1){
         return res.json({
