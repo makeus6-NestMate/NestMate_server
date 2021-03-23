@@ -1061,10 +1061,10 @@ exports.updateDaysTodo=async(req,res)=>{
     for(let _ of time){
         if(_==='/') cnt++;
     }
-    if(cnt!=4){
+    if(cnt!=1){
         return res.json({
             isSuccess:false,
-            message:'년 월 일 시간 분 다 입력해주세요',
+            message:'시간 분 다 입력해주세요',
             code:440
         })
     }
