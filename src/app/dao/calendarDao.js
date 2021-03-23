@@ -48,3 +48,14 @@ exports.selectCalendarByDate=(roomId,year,month)=>{
   
     return fun1(query,param);
 }
+
+exports.selectCalendarByDetailDate=(roomId,year,month,day)=>{
+  const query= `
+    SELECT category,time,categoryIdx,title,content,id AS calendarId
+    FROM Calendar
+    WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=? 
+  `;
+  const param=[roomId,year,month,day];
+
+  return fun1(query,param);
+}

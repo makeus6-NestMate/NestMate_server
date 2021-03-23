@@ -600,3 +600,108 @@ exports.getCalendar=async(req,res)=>{
 }
 
 
+
+exports.getDetailCalendar=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    let date=req.query.date;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+    if(!date){
+        return res.json({
+            isSuccess:false,
+            message:'날짜를 입력해주세요',
+            code:486
+        })
+    }
+    
+    let cnt=0;
+    for(let _ of date){
+        if(_==='/') cnt++;
+    }
+    if(cnt!=2){
+        return res.json({
+            isSuccess:false,
+            message:'년 월 일 다 입력해주세요',
+            code:488
+        })
+    }
+
+    date=date.split('/');
+
+  
+
+
+  
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const calendar=await calendarDao.selectCalendarByDetailDate(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
+
+        for(let _ of calendar){
+            _.time=moment(_.time).format('YYYY/MM/DD/hh/mm');
+        }
+        
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "일정 상세 조회 성공",
+            result:{
+                calendar:calendar
+            }
+        });
+
+    }
+    catch(err){
+        logger.error(`일정 상세 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+

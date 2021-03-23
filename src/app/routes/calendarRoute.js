@@ -8,5 +8,5 @@ module.exports = function(app){
    app.delete('/room/:roomId/calendar/:calendarId',verify,calendar.deleteCalendar);
 
    app.get('/room/:roomId/calendar',verify,calendar.getCalendar);
-   //app.get('/room/:roomId/calendar/detail',verify,calendar.getDetailCalendar);
+   app.get('/room/:roomId/calendar/detail',verify,calendar.getDetailCalendar);
 };
