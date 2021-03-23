@@ -12,11 +12,25 @@ exports.postCalendar=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {category,title,content}=req.body;
+    const {category,title,content,categoryIdx}=req.body;
 
     let {time}=req.body;
     let roomId=req.params.roomId;
     
+    if(!categoryIdx){
+        return res.json({
+            isSuccess:false,
+            message:'카테고리 아이디를 입력해주세요',
+            code:488
+        })
+    }
+    if(typeof(categoryIdx)!='number'){
+        return res.json({
+            isSuccess:false,
+            message:'카테고리 아이디는 숫자입니다',
+            code:489
+        })
+    }
 
     if(!roomId){
         return res.json({
@@ -45,7 +59,7 @@ exports.postCalendar=async(req,res)=>{
         })
     }
 
-    if(type(category)!='string'){
+    if(typeof(category)!='string'){
         return res.json({
             code:475,
             isSuccess:false,
@@ -141,7 +155,7 @@ exports.postCalendar=async(req,res)=>{
             })
         }
 
-        await calendarDao.insertCalendar(roomId,userId,title,content,time,category);
+        await calendarDao.insertCalendar(roomId,userId,title,content,time,category,categoryIdx);
 
         
         
@@ -170,12 +184,26 @@ exports.updateCalendar=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {category,title,content}=req.body;
+    const {category,title,content,categoryIdx}=req.body;
 
     let {time}=req.body;
     let roomId=req.params.roomId;
     let calendarId=req.params.calendarId;
 
+    if(!categoryIdx){
+        return res.json({
+            isSuccess:false,
+            message:'카테고리 아이디를 입력해주세요',
+            code:488
+        })
+    }
+    if(typeof(categoryIdx)!='number'){
+        return res.json({
+            isSuccess:false,
+            message:'카테고리 아이디는 숫자입니다',
+            code:489
+        })
+    }
     if(!roomId){
         return res.json({
             isSuccess:false,
@@ -203,7 +231,7 @@ exports.updateCalendar=async(req,res)=>{
         })
     }
 
-    if(type(category)!='string'){
+    if(typeof(category)!='string'){
         return res.json({
             code:475,
             isSuccess:false,
@@ -335,7 +363,7 @@ exports.updateCalendar=async(req,res)=>{
             })
         }
 
-        await calendarDao.updateCalendar(calendarId,title,content,time,category);
+        await calendarDao.updateCalendar(calendarId,title,content,time,category,categoryIdx);
 
         
         return res.json({
@@ -475,7 +503,7 @@ exports.getCalendar=async(req,res)=>{
     const userId=req.verifiedToken.id;
 
     let roomId=req.params.roomId;
-    let date=req.params.date;
+    let date=req.query.date;
 
     if(!roomId){
         return res.json({
@@ -509,7 +537,7 @@ exports.getCalendar=async(req,res)=>{
     for(let _ of date){
         if(_==='/') cnt++;
     }
-    if(cnt!=2){
+    if(cnt!=1){
         return res.json({
             isSuccess:false,
             message:'년 월 다 입력해주세요',
@@ -547,7 +575,9 @@ exports.getCalendar=async(req,res)=>{
 
         const calendar=await calendarDao.selectCalendarByDate(roomId,Number(date[0]),Number(date[1]));
 
-        
+        for(let _ of calendar){
+            _.time=moment(_.time).format('YYYY/MM/DD/hh/mm');
+        }
         
         return res.json({
             isSuccess: true,
