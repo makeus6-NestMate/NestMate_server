@@ -32,3 +32,11 @@ exports.updateNotice=(noticeId,notice)=>{
     const param=[notice,noticeId];
     return fun1(query,param); 
 };
+
+exports.deleteNotice=(noticeId)=>{
+    const query=`
+    DELETE FROM Notice WHERE id=?
+    `
+    const param=[noticeId];
+    return fun1(query,param); 
+};
