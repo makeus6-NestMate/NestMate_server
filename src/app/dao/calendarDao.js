@@ -23,7 +23,7 @@ exports.updateCalendar=(calendarId,title,content,time,category,categoryIdx)=>{
     const query= `
       UPDATE Calendar SET title=?,content=?,time=?,category=?,categoryIdx=? WHERE id=?
     `;
-    const param=[title,content,time,category,calendarId,categoryIdx];
+    const param=[title,content,time,category,categoryIdx,calendarId];
   
     return fun1(query,param);
 }

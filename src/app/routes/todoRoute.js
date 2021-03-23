@@ -14,4 +14,7 @@ module.exports = function(app){
     app.delete('/room/:roomId/todo/:todoId/day',verify,todo.deleteDayTodo);
     app.delete('/room/:roomId/todo/:todoId/days',verify,todo.deleteDaysTodo);
 
+    //app.delete('/room/:roomId/todo/day',verify,todo.deleteAllDayTodo);
+    //app.delete('/room/:roomId/todo/days',verify,todo.deleteAllDaysTodo)
+
 };

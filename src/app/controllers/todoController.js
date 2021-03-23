@@ -1264,3 +1264,84 @@ exports.updateDaysTodo=async(req,res)=>{
         });
     }
 }
+
+
+
+
+exports.deleteAllDayTodo=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let todoId=req.params.todoId;
+
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+
+    
+    const connection = await pool.getConnection(async conn => conn);
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+     
+
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "하루 할일 전체 삭제 성공"
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`하루 할일 전체 삭제 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
