@@ -20,7 +20,7 @@ exports.selectRuleById=(ruleId)=>{
 
 
 
-exports.updateRule=(ruleId,rule)=>{
+exports.updateRule=(rule,ruleId)=>{
     const query= `
       UPDATE Rule SET rule=? WHERE id=?
     `;

@@ -210,7 +210,6 @@ exports.updateRule=async(req,res)=>{
         
 
 
-
         await ruleDao.updateRule(rule,ruleId);
 
         
