@@ -40,3 +40,33 @@ exports.deleteNotice=(noticeId)=>{
     const param=[noticeId];
     return fun1(query,param); 
 };
+
+
+exports.getNotice=(roomId)=>{
+    const query=`
+    SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt
+    FROM Notice INNER JOIN User ON Notice.userId=User.id
+    `
+    const param=[roomId];
+    return fun1(query,param); 
+};
+
+
+exports.getVote=(roomId)=>{
+    const query=`
+    SELECT profileImg,Vote.id AS voteId , title , Vote.createdAt, isFinished
+    FROM Vote INNER JOIN User ON Vote.userId=User.id
+    `
+    const param=[roomId];
+    return fun1(query,param); 
+};
+
+exports.getVoteChoice=(voteId)=>{
+    const query=`
+    SELECT choice
+    FROM VoteChoice
+    `
+    const param=[voteId];
+    return fun1(query,param); 
+};
+

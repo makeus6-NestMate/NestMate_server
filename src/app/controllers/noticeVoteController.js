@@ -4,7 +4,7 @@ const {logger} = require('../../../config/winston');
 const authDao=require('../dao/authDao');
 const roomDao = require('../dao/roomDao');
 const noticeVoteDao=require('../dao/noticeVoteDao');
-
+const moment=require('moment');
 
 
 
@@ -825,3 +825,115 @@ exports.deleteVote=async(req,res)=>{
         });
     }
 }
+
+
+
+
+
+exports.getNoticeVote=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+
+    let roomId=req.params.roomId;
+ 
+    
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+  
+  
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+
+        let result=[];
+
+        let notice=await noticeVoteDao.getNotice(roomId);
+        let vote=await noticeVoteDao.getVote(roomId);
+        
+        for(let _ of notice){
+            let ob=_;
+            ob.isNotice='Y';
+            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/hh/mm');
+            result.push(ob);
+        }
+
+        for(let _ of vote){
+            let ob=_;
+            const choice=await noticeVoteDao.getVoteChoice(_.voteId);
+            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/hh/mm');
+            let choices=[];
+            for(let _ of choice){
+                choices.push(_.choice);
+            }       
+            ob.choice=choices;
+
+            ob.isNotice='N';
+            result.push(ob);
+        }
+
+
+        
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "투표/공지 조회 성공",
+            result:{
+                noticeVote:result
+            }
+        });
+
+    }
+    catch(err){
+
+        
+        logger.error(`투표/공지 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+

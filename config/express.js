@@ -25,6 +25,6 @@ module.exports = function () {
     require('../src/app/routes/todoRoute')(app);
     require('../src/app/routes/memoRoute')(app);
     require('../src/app/routes/ruleRoute')(app);
-
+    require('../src/app/routes/noticeVoteRoute')(app);
     return app;
 };
