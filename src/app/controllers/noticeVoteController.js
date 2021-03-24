@@ -897,10 +897,9 @@ exports.getNoticeVote=async(req,res)=>{
 
         for(let _ of vote){
             let ob=_;
-            const choice=await noticeVoteDao.getVoteChoice(_.voteId);
             ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
-            ob.choice=choice;
             ob.isNotice='N';
+            ob.isFinished=_.isFinished;
             result.push(ob);
         }
 
@@ -1005,7 +1004,7 @@ exports.patchVote=async(req,res)=>{
     voteId=Number(voteId);
 
 
-  
+    const connection = await pool.getConnection(async conn => conn);
     try{
 
         const user=await authDao.selectUserById(userId);
@@ -1048,7 +1047,7 @@ exports.patchVote=async(req,res)=>{
         }
 
         
-        const choice2=await noticeVoteDao.selectVoteChoiceUser(choiceId,userId);
+        const choice2=await noticeVoteDao.selectVoteChoiceUser(voteId,userId);
         if(choice2.length>0){
             return res.json({
                 isSuccess:false,
@@ -1057,9 +1056,50 @@ exports.patchVote=async(req,res)=>{
             })
         }
 
-        await noticeVoteDao.insertVoteChoiceUser(choiceId,userId);
+        
+        await connection.beginTransaction();
 
 
+        const query1= `
+        INSERT INTO VoteChoiceUser(choiceId,userId) VALUES(?,?)
+        `;
+        const param1=[choiceId,userId];
+        await connection.query(
+            query1,
+            param1
+        );
+        
+        const query2= `
+        SELECT (SELECT COUNT(DISTINCT userId) FROM RoomUser WHERE roomId=?) AS roomMemberCnt,
+        (SELECT COUNT(DISTINCT userId) FROM VoteChoice INNER JOIN VoteChoiceUser
+        ON VoteChoice.id=VoteChoiceUser.choiceId WHERE voteId=? ) AS voteMemberCnt
+        `;
+
+        const param2=[roomId,voteId];
+        const [[result]]=await connection.query(
+            query2,
+            param2
+        );
+
+
+        if(result.roomMemberCnt===result.voteMemberCnt){
+            const query3= `
+            UPDATE Vote SET isFinished='Y' WHERE id=?
+            `;
+    
+            const param3=[voteId];
+            await connection.query(
+                query3,
+                param3
+            );
+        }
+
+        
+
+
+
+        await connection.commit();
+        await connection.release();
 
         return res.json({
             isSuccess: true,
@@ -1071,7 +1111,276 @@ exports.patchVote=async(req,res)=>{
     catch(err){
 
         
+        await connection.rollback();
+        await connection.release();
         logger.error(`투표 하기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+
+
+
+
+
+exports.getVote=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+
+    let roomId=req.params.roomId;
+    let voteId=req.params.voteId;
+    
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+ 
+    
+
+    if(!voteId){
+        return res.json({
+            isSuccess:false,
+            message:'투표아이디를 입력해주세요',
+            code:471
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=voteId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:472,
+            isSuccess:false,
+            message:"투표 아이디는 숫자입니다"
+        })
+    }
+    voteId=Number(voteId);
+
+
+    const connection = await pool.getConnection(async conn => conn);
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const vote=await noticeVoteDao.selectVote(voteId);
+       
+        if(vote.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 투표 아이디입니다',
+                code:473
+            })
+        }
+
+        const choice=await noticeVoteDao.selectVoteChoices(voteId);
+        const [unVoteMember]=await noticeVoteDao.selectUnVoteMember(roomId,voteId);
+
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "투표 조회 성공",
+            result:{
+                isFinished:vote[0].isFinished,
+                voteTitle:vote[0].title,
+                choice:choice,
+                unVoteMemeberCnt:unVoteMember.roomMemberCnt-unVoteMember.voteMemberCnt
+            }
+        });
+
+    }
+    catch(err){
+
+        
+        logger.error(`투표 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+exports.getVoteUser=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+
+    let roomId=req.params.roomId;
+    let voteId=req.params.voteId;
+    let choiceId=req.params.choiceId;
+    
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+ 
+    
+
+    if(!voteId){
+        return res.json({
+            isSuccess:false,
+            message:'투표아이디를 입력해주세요',
+            code:471
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=voteId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:472,
+            isSuccess:false,
+            message:"투표 아이디는 숫자입니다"
+        })
+    }
+    voteId=Number(voteId);
+
+
+    if(!choiceId){
+        return res.json({
+            isSuccess:false,
+            message:'선택지 아이디를 입력해주세요',
+            code:490
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=choiceId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:491,
+            isSuccess:false,
+            message:"선택지 아이디는 숫자입니다"
+        })
+    }
+    choiceId=Number(choiceId);
+
+
+
+    const connection = await pool.getConnection(async conn => conn);
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const vote=await noticeVoteDao.selectVote(voteId);
+       
+        if(vote.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 투표 아이디입니다',
+                code:473
+            })
+        }
+
+
+        const choice1=await noticeVoteDao.selectVoteChoice(choiceId);
+        if(choice1.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 선택지 아이디입니다',
+                code:492
+            })
+        }
+
+        const voteMember=await noticeVoteDao.selectVoteMember(choiceId);
+
+
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "투표 멤버 조회 성공",
+            result:{
+                voteMember:voteMember
+            }
+        });
+
+    }
+    catch(err){
+
+        
+        logger.error(`투표 멤버 조회 실패\n: ${err.message}`);
         return res.json({
             message:err.message,
             code:500,
