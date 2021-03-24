@@ -13,4 +13,6 @@ module.exports = function(app){
 
    app.get('/room/:roomId/noticeVote',verify,noticeVote.getNoticeVote);
 
+   app.patch('/room/:roomId/vote/:voteId',verify,noticeVote.patchVote);
+
 };

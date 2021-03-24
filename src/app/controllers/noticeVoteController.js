@@ -899,12 +899,7 @@ exports.getNoticeVote=async(req,res)=>{
             let ob=_;
             const choice=await noticeVoteDao.getVoteChoice(_.voteId);
             ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/hh/mm');
-            let choices=[];
-            for(let _ of choice){
-                choices.push(_.choice);
-            }       
-            ob.choice=choices;
-
+            ob.choice=choice;
             ob.isNotice='N';
             result.push(ob);
         }
@@ -937,3 +932,150 @@ exports.getNoticeVote=async(req,res)=>{
 
 
 
+
+
+
+
+exports.patchVote=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    const {choiceId}=req.body;
+
+    let roomId=req.params.roomId;
+    let voteId=req.params.voteId;
+    
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+
+    if(choiceId==undefined||choiceId===null){
+        return res.json({
+            code:490,
+            isSuccess:false,
+            message:"선택지 아이디를 입력해주세요"
+        })
+    }
+    if(typeof(choiceId)!='number'){
+        return res.json({
+            code:491,
+            isSuccess:false,
+            message:"선택지 아이디는 숫자입니다"
+        })
+    }
+
+ 
+    
+
+    if(!voteId){
+        return res.json({
+            isSuccess:false,
+            message:'투표아이디를 입력해주세요',
+            code:471
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=voteId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:472,
+            isSuccess:false,
+            message:"투표 아이디는 숫자입니다"
+        })
+    }
+    voteId=Number(voteId);
+
+
+  
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const vote=await noticeVoteDao.selectVote(voteId);
+       
+        if(vote.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 투표 아이디입니다',
+                code:473
+            })
+        }
+
+        const choice1=await noticeVoteDao.selectVoteChoice(choiceId);
+        if(choice1.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 선택지 아이디입니다',
+                code:492
+            })
+        }
+
+        
+        const choice2=await noticeVoteDao.selectVoteChoiceUser(choiceId,userId);
+        if(choice2.length>0){
+            return res.json({
+                isSuccess:false,
+                message:'이미 투표를 하셨습니다.',
+                code:493
+            })
+        }
+
+        await noticeVoteDao.insertVoteChoiceUser(choiceId,userId);
+
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "투표 하기 성공"
+        });
+
+    }
+    catch(err){
+
+        
+        logger.error(`투표 하기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}

@@ -63,10 +63,41 @@ exports.getVote=(roomId)=>{
 
 exports.getVoteChoice=(voteId)=>{
     const query=`
-    SELECT choice
+    SELECT choice,id AS choiceId
     FROM VoteChoice
+    WHERE voteId=?
     `
     const param=[voteId];
     return fun1(query,param); 
 };
+
+exports.selectVoteChoice=(choiceId)=>{
+    const query=`
+   SELECT *
+   FROM VoteChoice
+   WHERE id=?
+    `
+    const param=[choiceId];
+    return fun1(query,param); 
+};
+
+exports.insertVoteChoiceUser=(choiceId,userId)=>{
+    const query=`
+    INSERT INTO VoteChoiceUser(choiceId,userId) VALUES(?,?)
+    `
+    const param=[choiceId,userId];
+    return fun1(query,param); 
+};
+
+exports.selectVoteChoiceUser=(choiceId,userId)=>{
+    const query=`
+    SELECT * 
+    FROM VoteChoiceUser
+    WHERE choiceId=? AND userId=?
+    `
+    const param=[choiceId,userId];
+    return fun1(query,param); 
+};
+
+
 
