@@ -12,12 +12,12 @@ exports.postCalendar=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {category,title,content,categoryIdx}=req.body;
-
+    const {category,title,categoryIdx}=req.body;
+    let {content}=req.body;
     let {time}=req.body;
     let roomId=req.params.roomId;
     
-    if(!categoryIdx){
+    if(categoryIdx===null||categoryIdx===undefined){
         return res.json({
             isSuccess:false,
             message:'카테고리 아이디를 입력해주세요',
@@ -113,22 +113,8 @@ exports.postCalendar=async(req,res)=>{
             code:480
         })
     }
-
-    if(!content){
-        return res.json({
-            isSuccess:false,
-            message:'내용을 입력해주세요',
-            code:481
-        })
-    }
+    if(!content) content="";
     
-    if(typeof(content)!='string'){
-        return res.json({
-            isSuccess:false,
-            message:'내용은 문자열입니다',
-            code:482
-        })
-    }
 
 
 
