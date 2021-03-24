@@ -891,14 +891,14 @@ exports.getNoticeVote=async(req,res)=>{
         for(let _ of notice){
             let ob=_;
             ob.isNotice='Y';
-            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/hh/mm');
+            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
             result.push(ob);
         }
 
         for(let _ of vote){
             let ob=_;
             const choice=await noticeVoteDao.getVoteChoice(_.voteId);
-            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/hh/mm');
+            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
             ob.choice=choice;
             ob.isNotice='N';
             result.push(ob);

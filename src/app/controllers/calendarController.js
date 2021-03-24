@@ -563,7 +563,7 @@ exports.getCalendar=async(req,res)=>{
         const calendar=await calendarDao.selectCalendarByDate(roomId,Number(date[0]),Number(date[1]));
 
         for(let _ of calendar){
-            _.time=moment(_.time).format('YYYY/MM/DD/hh/mm');
+            _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');
         }
         
         return res.json({
@@ -666,7 +666,7 @@ exports.getDetailCalendar=async(req,res)=>{
         const calendar=await calendarDao.selectCalendarByDetailDate(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
 
         for(let _ of calendar){
-            _.time=moment(_.time).format('YYYY/MM/DD/hh/mm');
+            _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');
         }
         
         return res.json({
