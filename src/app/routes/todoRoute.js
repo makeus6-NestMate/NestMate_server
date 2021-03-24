@@ -14,7 +14,12 @@ module.exports = function(app){
     app.delete('/room/:roomId/todo/:todoId/day',verify,todo.deleteDayTodo);
     app.delete('/room/:roomId/todo/:todoId/days',verify,todo.deleteDaysTodo);
 
-    //app.delete('/room/:roomId/todo/day',verify,todo.deleteAllDayTodo);
-    //app.delete('/room/:roomId/todo/days',verify,todo.deleteAllDaysTodo)
+    app.delete('/room/:roomId/todo/day',verify,todo.deleteAllDayTodo);
+    app.delete('/room/:roomId/todo/days',verify,todo.deleteAllDaysTodo);
 
+
+    app.get('/room/:roomId/todo/day/search',verify,todo.getDaySearch);
+    app.get('/room/:roomId/todo/days/search',verify,todo.getDaysSearch);
+
+    app.get('/room/:roomId/todo/day/calendar',verify,todo.getDateSearch);
 };

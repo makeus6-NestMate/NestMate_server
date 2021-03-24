@@ -6,4 +6,5 @@ module.exports = function(app){
     app.post('/room/:roomId/member',verify,room.enterRoom);
     app.get('/room',verify,room.getRoom);
     app.delete('/room/:roomId/member',verify,room.leaveRoom);
+    
 };

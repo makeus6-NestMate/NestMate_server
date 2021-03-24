@@ -1266,14 +1266,10 @@ exports.updateDaysTodo=async(req,res)=>{
 }
 
 
-
-
+//하루 할일 전체 삭제
 exports.deleteAllDayTodo=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
-
-    let todoId=req.params.todoId;
-
     let roomId=req.params.roomId;
 
     if(!roomId){
@@ -1321,9 +1317,46 @@ exports.deleteAllDayTodo=async(req,res)=>{
                 code:432
             })
         }
+
+        // 자신이 방에 작성한 마감일이 지나지 않고 완료되지 않은 하루 할일 조회 후 할일과 할일시간 삭제
+        await connection.beginTransaction();
      
+        
+        const query1= `
+        SELECT Todo.id 
+        FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
+        LEFT OUTER JOIN TodoUser ON Todo.id=TodoUser.todoId
+        WHERE Todo.roomId=? AND Todo.userId=? AND Todo.isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null;
+        `;
+        const param1=[roomId,userId,'N'];
+        const [todoIds]=await connection.query(
+            query1,
+            param1
+        );
 
+        for(let _ of todoIds){
 
+            const query2= `
+            DELETE FROM Todo WHERE id=?
+            `;
+            const param2=[_.id];
+            await connection.query(
+                query2,
+                param2
+            );
+
+            const query3= `
+            DELETE FROM TodoTime WHERE todoId=?
+            `;
+            const param3=[_.id];
+            await connection.query(
+                query3,
+                param3
+            );
+        }
+
+        await connection.commit();
+        await connection.release();
 
         return res.json({
             isSuccess: true,
@@ -1335,7 +1368,8 @@ exports.deleteAllDayTodo=async(req,res)=>{
     }
     catch(err){
 
-    
+        await connection.rollback();
+        await connection.release();
         logger.error(`하루 할일 전체 삭제 실패\n: ${err.message}`);
         return res.json({
             message:err.message,
@@ -1344,4 +1378,437 @@ exports.deleteAllDayTodo=async(req,res)=>{
         });
     }
 }
+
+
+
+
+
+//반복 할일 전체 삭제
+exports.deleteAllDaysTodo=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+
+    
+    const connection = await pool.getConnection(async conn => conn);
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        // 자신이 방에 작성한 반복할일 조회후 할일과 할일시간 할일요일 삭제
+        await connection.beginTransaction();
+     
+        
+        const query1= `
+        SELECT Todo.id 
+        FROM Todo 
+        WHERE roomId=? AND userId=? AND isRepeat=?
+        `;
+        const param1=[roomId,userId,'Y'];
+        const [todoIds]=await connection.query(
+            query1,
+            param1
+        );
+
+        for(let _ of todoIds){
+
+            const query2= `
+            DELETE FROM Todo WHERE id=?
+            `;
+            const param2=[_.id];
+            await connection.query(
+                query2,
+                param2
+            );
+
+            const query3= `
+            DELETE FROM TodoRepeatTime WHERE todoId=?
+            `;
+            const param3=[_.id];
+            await connection.query(
+                query3,
+                param3
+            );
+
+            const query4= `
+            DELETE FROM TodoRepeatDay WHERE todoId=?
+            `;
+            const param4=[_.id];
+            await connection.query(
+                query4,
+                param4
+            );
+        }
+
+        await connection.commit();
+        await connection.release();
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "반복 할일 전체 삭제 성공"
+        });
+
+
+    }
+    catch(err){
+
+        await connection.rollback();
+        await connection.release();
+        logger.error(`반복 할일 전체 삭제 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//하루 할일 키워드 검색
+exports.getDaySearch=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    const keyword=req.query.keyword;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+    
+    if(!keyword){
+        return res.json({
+            code:494,
+            isSuccess:false,
+            message:"검색어를 입력해주세요"
+        })
+    }
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        let todo=await todoDao.selectDaySearch(roomId,keyword);
+
+        for(let _ of todo){
+          
+            _.deadline=moment(_.deadline).format('MM/DD/HH/mm');
+        }
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "하루 할일 검색 성공",
+            result:{
+                todo:todo
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`하루 할일 검색 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//반복할일 키워드 검색
+exports.getDaysSearch=async(req,res)=>{
+    
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    const keyword=req.query.keyword;
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+    if(!keyword){
+        return res.json({
+            code:494,
+            isSuccess:false,
+            message:"검색어를 입력해주세요"
+        })
+    }
+
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const todo=await todoDao.selectDaysSearch(roomId,keyword);
+
+        for(let _ of todo){
+            
+    
+            let time=_.deadline.split(':');
+            _.deadline=time[0]+'/'+time[1];
+
+            let days=await todoDao.selectDays(todo[0].todoId);
+            let day='0000000';
+         
+            for(let _ of days){
+              
+                if(_.day==0) day='1'+day.substr(1);
+                else if(_.day==1) day=day.substr(0,1)+'1'+day.substr(2);
+                else if(_.day==2) day=day.substr(0,2)+'1'+day.substr(3);
+                else if(_.day==3) day=day.substr(0,3)+'1'+day.substr(4);
+                else if(_.day==4) day=day.substr(0,4)+'1'+day.substr(5);
+                else if(_.day==5) day=day.substr(0,5)+'1'+day.substr(6);
+                else if(_.day==6) day=day.substr(0,6)+'1';
+            }
+            _.day=day;
+
+        }
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "반복 할일 검색 성공",
+            result:{
+                todo:todo
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`반복 할일 검색 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//하루 할일 키워드 검색
+exports.getDateSearch=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    let date=req.query.date;
+   
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+    
+
+    if(!date){
+        return res.json({
+            isSuccess:false,
+            message:'날짜를 입력해주세요',
+            code:486
+        })
+    }
+    
+    let cnt=0;
+    for(let _ of date){
+        if(_==='/') cnt++;
+    }
+    if(cnt!=2){
+        return res.json({
+            isSuccess:false,
+            message:'년 월 일 다 입력해주세요',
+            code:488
+        })
+    }
+
+    date=date.split('/');
+  
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        let todo=await todoDao.selectDateSearch(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
+
+        for(let _ of todo){
+          
+            _.deadline=moment(_.deadline).format('MM/DD/HH/mm');
+        }
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "하루 할일 날짜 검색 성공",
+            result:{
+                todo:todo
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`하루 할일 날짜 검색 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
 
