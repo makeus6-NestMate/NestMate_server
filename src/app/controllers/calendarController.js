@@ -363,6 +363,7 @@ exports.updateCalendar=async(req,res)=>{
             })
         }
 
+        
         await calendarDao.updateCalendar(calendarId,title,content,time,category,categoryIdx);
 
         

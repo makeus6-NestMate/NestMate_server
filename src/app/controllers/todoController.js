@@ -1038,7 +1038,7 @@ exports.updateDaysTodo=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const roomId=req.params.roomId;
+    let roomId=req.params.roomId;
     const {todo,time,todoId,days}=req.body;
     
 
@@ -1216,7 +1216,7 @@ exports.updateDaysTodo=async(req,res)=>{
 
         
         const query3= `
-        DELETE TodoRepeatDay WHERE todoId=?
+        DELETE FROM TodoRepeatDay WHERE todoId=?
         `;
         const param3=[todoId];
         await connection.query(
@@ -1231,7 +1231,7 @@ exports.updateDaysTodo=async(req,res)=>{
             const query5= `
             INSERT INTO TodoRepeatDay(day,todoId) VALUES(?,?);
             `;
-            const param5=[i,todoId.maxId];
+            const param5=[i,todoId];
             await connection.query(
                 query5,
                 param5
