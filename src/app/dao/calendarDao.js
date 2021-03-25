@@ -40,7 +40,7 @@ exports.deleteCalendar=(calendarId)=>{
 
 exports.selectCalendarByDate=(roomId,year,month)=>{
     const query= `
-      SELECT time
+      SELECT DISTINCT time
       FROM Calendar
       WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? 
     `;
