@@ -6,6 +6,6 @@ module.exports = function(app){
     app.get('/user/profile',verify,etc.getProfile);
 
     app.get('/room/:roomId/chart',verify,etc.getChart);
-    //app.post('/user/:userId/clap',verify,etc.postClap);
-    //app.get('/alarm',verify,getAlarm);
+    app.post('/room/:roomId/member/:memberId/clap',verify,etc.postClap);
+    app.get('/room/:roomId/alarm',verify,etc.getAlarm);
 };

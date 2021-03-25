@@ -19,12 +19,61 @@ exports.selectProfile=(userId)=>{
 };
 
 
-exports.selectBestUser=(start,end,roomId)=>{
+exports.selectComplete=(start,end,roomId)=>{
     const query=`
-        SELECT *
-        FROM Room 
-        WHERE createdAt BETWEEN ? AND ?
+        SELECT TodoUser.userId,COUNT(*) AS cnt
+        FROM RoomUser INNER JOIN TodoUser ON RoomUser.userId=TodoUser.userId
+        WHERE RoomUser.roomId=? AND TodoUser.createdAt BETWEEN ? AND ?
+        GROUP BY TodoUser.userId
     `
-    const param=[start,end];
+    const param=[roomId,start,end];
     return fun1(query,param); 
 };
+
+exports.selectMember=(roomId)=>{
+    const query=`
+        SELECT RoomUser.userId,profileImg,nickname
+        FROM RoomUser INNER JOIN User ON RoomUser.userId=User.id
+        WHERE RoomUser.roomId=?
+    `
+    const param=[roomId];
+    return fun1(query,param); 
+};
+
+
+
+exports.selectBestMember=(userId)=>{
+    const query=`
+        SELECT profileImg,prizeCount
+        FROM User
+        WHERE id=?
+    `
+    const param=[userId];
+    return fun1(query,param); 
+};
+
+exports.selectAlarm=(userId,roomId)=>{
+    const query=`
+
+        SELECT User.profileImg,Send.message,Send.createdAt
+        FROM User INNER JOIN
+        (SELECT senderId,message,Alarm.createdAt
+        FROM Alarm INNER JOIN User ON Alarm.receiverId=User.id
+        INNER JOIN RoomUser ON RoomUser.userId=User.id
+        WHERE RoomUser.roomId=? AND User.id=?) Send
+        ON User.id=Send.senderId
+    `
+    const param=[roomId,userId];
+    return fun1(query,param); 
+};
+
+
+exports.insertClap=(userId,memberId,message)=>{
+    const query=`
+    INSERT INTO Alarm(receiverId,senderId,message) VALUES(?,?,?)
+    `
+    const param=[userId,memberId,message];
+    return fun1(query,param); 
+};
+
+
