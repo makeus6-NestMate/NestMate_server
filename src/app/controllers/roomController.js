@@ -542,7 +542,10 @@ exports.getMember = async(req, res)=> {
 
         const member=await roomDao.getMember(roomId);
         
-
+        for(let _ of member){
+            if(_.userId===userId)   _.isSelf=true;
+            else _.isSelf=false;
+        }
         
         return res.json({
             isSuccess: true,

@@ -5,7 +5,7 @@ const todoDao = require('../dao/todoDao');
 const authDao=require('../dao/authDao');
 const roomDao = require('../dao/roomDao');
 const etcDao=require('../dao/etcDao');
-
+const moment=require('moment');
 
 exports.updateProfile=async(req,res)=>{
     
@@ -132,6 +132,26 @@ exports.getProfile=async(req,res)=>{
 exports.getChart=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
 
     try{
 
@@ -146,17 +166,25 @@ exports.getChart=async(req,res)=>{
             })
         }
 
-
-        const best=await etcDao.selectBestUser(roomId)
-
-    
         
+      
+        
+        for(let i=6;i>=0;i--){
+            const start=moment().startOf('week').subtract(i,'days').format('YY/MM/DD HH:mm');
+            const end=moment().endOf('week').subtract(i+6,'days').format('YY/MM/DD HH:mm');
+
+            const complete=await etcDao.selectComplete(start,end,roomId);
+
+            
+
+        }
+
+
         return res.json({
             isSuccess: true,
             code: 200,
             message: "차트 조회 성공",
             result:{
-
             }
         });
 

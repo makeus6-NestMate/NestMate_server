@@ -95,7 +95,7 @@ exports.updateRoom=(color,name,roomId)=>{
 
 exports.getMember=(roomId)=>{
   const query=`
-  SELECT profileImg,nickname
+  SELECT profileImg,nickname,RoomUser.userId
   FROM RoomUser INNER JOIN User ON RoomUser.userId=User.id
   WHERE roomId=?
   `

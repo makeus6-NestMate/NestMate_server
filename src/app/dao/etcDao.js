@@ -17,3 +17,14 @@ exports.selectProfile=(userId)=>{
     const param=[userId];
     return fun1(query,param); 
 };
+
+
+exports.selectBestUser=(start,end,roomId)=>{
+    const query=`
+        SELECT *
+        FROM Room 
+        WHERE createdAt BETWEEN ? AND ?
+    `
+    const param=[start,end];
+    return fun1(query,param); 
+};
