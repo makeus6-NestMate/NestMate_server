@@ -18,4 +18,5 @@ module.exports = function(app){
    app.get('/room/:roomId/vote/:voteId',verify,noticeVote.getVote);
    app.get('/room/:roomId/vote/:voteId/choice/:choiceId',verify,noticeVote.getVoteUser);
 
+   app.patch('/room/:roomId/vote/:voteId/complete',verify,noticeVote.completeVote);
 };

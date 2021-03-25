@@ -136,4 +136,28 @@ exports.selectVoteMember=(choiceId)=>{
 
 
 
+exports.selectVoteChoicess=(voteId,userId)=>{
+    const query= `
+    SELECT * 
+    FROM Vote INNER JOIN VoteChoice ON Vote.id=VoteChoice.voteId 
+    INNER JOIN VoteChoiceUser ON VoteChoice.id=VoteChoiceUser.choiceId
+    WHERE Vote.id=? AND VoteChoiceUser.userId=?
+    `;
+
+    const param=[voteId,userId];
+    return fun1(query,param);
+};
+
+
+exports.completeVote=(voteId)=>{
+    const query= `
+    UPDATE Vote SET isFinished=? WHERE id=?
+    `;
+
+    const param=['Y',voteId];
+    return fun1(query,param);
+};
+
+
+
 
