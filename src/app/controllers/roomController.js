@@ -3,7 +3,7 @@ const {logger} = require('../../../config/winston');
 
 const roomDao = require('../dao/roomDao');
 const authDao=require('../dao/authDao');
-
+const regexEmail = require('regex-email');
 
 exports.createRoom = async(req, res)=> {
     const {
@@ -199,7 +199,7 @@ exports.enterRoom = async(req, res)=> {
             })
         }
 
-        const roomUser=await roomDao.selectRoomUser(roomId,user[0].id);
+        const roomUser=await roomDao.selectRoomUser(roomId,userEmail[0].id);
         if(roomUser.length>0){
             return res.json({
                 isSuccess:false,
@@ -208,10 +208,10 @@ exports.enterRoom = async(req, res)=> {
             })
         }
         
+ 
 
 
-
-        await roomDao.insertMember(roomId,userId,'N');
+        await roomDao.insertMember(roomId,userEmail[0].id,'N');
         
         return res.json({
             isSuccess: true,
