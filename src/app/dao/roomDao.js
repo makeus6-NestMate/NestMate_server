@@ -84,3 +84,21 @@ exports.selectCock=(roomId)=>{
   const param=[roomId];
   return fun1(query,param); 
 }
+
+exports.updateRoom=(color,name,roomId)=>{
+  const query=`
+  UPDATE Room SET color=?,name=? WHERE id=?
+  `
+  const param=[color,name,roomId];
+  return fun1(query,param); 
+}
+
+exports.getMember=(roomId)=>{
+  const query=`
+  SELECT profileImg,nickname
+  FROM RoomUser INNER JOIN User ON RoomUser.userId=User.id
+  WHERE roomId=?
+  `
+  const param=[roomId];
+  return fun1(query,param); 
+}

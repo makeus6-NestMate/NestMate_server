@@ -4,6 +4,7 @@ const {logger} = require('../../../config/winston');
 const roomDao = require('../dao/roomDao');
 const authDao=require('../dao/authDao');
 const regexEmail = require('regex-email');
+const { RoomContext } = require('twilio/lib/rest/insights/v1/room');
 
 exports.createRoom = async(req, res)=> {
     const {
@@ -393,3 +394,175 @@ exports.getRoom=async(req,res)=>{
     }
 }
 
+
+
+
+exports.updateRoom = async(req, res)=> {
+    const {
+        color,name
+    } = req.body;
+
+    let roomId=req.params.roomId;
+    const userId=req.verifiedToken.id;
+
+  
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+  
+        const roomUser=await roomDao.selectRoomUser(roomId,userId);
+        if(roomUser.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'권한이 없습니다',
+                code:458
+            })
+        }
+
+        await roomDao.updateRoom(color,name,roomId);
+        
+
+        
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "둥지 수정 성공"
+        });
+
+
+    }
+    catch(err){
+    
+        logger.error(`둥지 수정 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+
+};
+
+
+
+
+exports.getMember = async(req, res)=> {
+ 
+
+    let roomId=req.params.roomId;
+    const userId=req.verifiedToken.id;
+
+  
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+  
+
+        const member=await roomDao.getMember(roomId);
+        
+
+        
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "초대한 인원들 가져오기 성공",
+            result:{
+                member:member
+            }
+        });
+
+
+    }
+    catch(err){
+    
+        logger.error(`초대한 인원들 가져오기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+
+};
