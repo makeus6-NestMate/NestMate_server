@@ -1218,9 +1218,13 @@ exports.getVote=async(req,res)=>{
         const [unVoteMember]=await noticeVoteDao.selectUnVoteMember(roomId,voteId);
 
         const choices=await noticeVoteDao.selectVoteChoicess(voteId,userId);
-        let isChoice;
-        if(choices.length<1)    isChoice=false;
-        else isChoice=true;
+        let choiceId;
+        if(choices.length<1){
+            choiceId=-1;
+        }
+        else{
+            choiceId=choices[0].choiceId;
+        }
 
 
         return res.json({
@@ -1228,7 +1232,7 @@ exports.getVote=async(req,res)=>{
             code: 200,
             message: "투표 조회 성공",
             result:{
-                isChoice:isChoice,
+                choiceId:choiceId,
                 isFinished:vote[0].isFinished,
                 voteTitle:vote[0].title,
                 choice:choice,
