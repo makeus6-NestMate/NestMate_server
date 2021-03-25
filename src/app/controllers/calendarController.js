@@ -564,7 +564,20 @@ exports.getCalendar=async(req,res)=>{
 
         for(let _ of calendar){
             _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');
+
+            const times=_.time.split('/');
+            const categories=await calendarDao.selectCalendarByDate1(roomId,times[0],times[1],times[2]);
+            _.categories=categories;
+
         }
+
+        
+
+
+
+
+
+
         
         return res.json({
             isSuccess: true,

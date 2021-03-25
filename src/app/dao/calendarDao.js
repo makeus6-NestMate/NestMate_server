@@ -40,13 +40,24 @@ exports.deleteCalendar=(calendarId)=>{
 
 exports.selectCalendarByDate=(roomId,year,month)=>{
     const query= `
-      SELECT category,time,categoryIdx
+      SELECT time
       FROM Calendar
       WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? 
     `;
     const param=[roomId,year,month];
   
     return fun1(query,param);
+}
+
+exports.selectCalendarByDate1=(roomId,year,month,day)=>{
+  const query= `
+    SELECT category,categoryIdx
+    FROM Calendar
+    WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=? 
+  `;
+  const param=[roomId,year,month,day];
+
+  return fun1(query,param);
 }
 
 exports.selectCalendarByDetailDate=(roomId,year,month,day)=>{
