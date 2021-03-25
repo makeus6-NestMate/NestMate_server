@@ -1812,3 +1812,436 @@ exports.getDateSearch=async(req,res)=>{
 }
 
 
+
+//할일 마치기
+exports.completeTodo=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    let todoId=req.params.todoId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+    roomId=Number(roomId);
+
+
+
+    if(!todoId){
+        return res.json({
+            isSuccess:false,
+            message:'할일 아이디를 입력해주세요',
+            code:444
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=todoId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:445,
+            isSuccess:false,
+            message:"할일 아이디는 숫자입니다"
+        })
+    }
+    todoId=Number(todoId);
+
+
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const todos=await todoDao.selectTodo(todoId);
+       
+        if(todos.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 할일 아이디입니다',
+                code:446
+            })
+        }
+
+        await todoDao.completeTodo(todoId,userId);
+
+        
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "할일 마치기 성공"
+        });
+
+
+    }
+    catch(err){
+        logger.error(`할일 마치기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//오늘 할일 가져오기 
+exports.getTodayTodo=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const date=new Date();
+        const result=[];
+   
+        let todo=await todoDao.selectTodayTodo(roomId,date.getFullYear(),date.getMonth()+1,date.getDate());
+
+        for(let _ of todo){
+            
+            if(!_.profileImg) _.profileImg="";
+
+            _.deadline=moment(_.deadline).format('YYYY/MM/DD/HH/mm');
+            let t=_.deadline.split('/');
+            console.log(t);
+            _.deadline=t[3]+'/'+t[4];
+
+            result.push(_);
+
+        }
+
+        let todos=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7);
+
+        for(let _ of todos){
+            
+            if(!_.profileImg) _.profileImg="";
+    
+            let t=_.deadline.split(':');
+            console.log(t);
+            _.deadline=t[0]+'/'+t[1];
+
+            result.push(_);
+
+        }
+
+
+        
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "오늘 할일 조회 성공",
+            result:{
+                todo:result
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`오늘 할일 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//콕 찌를 멤버 
+exports.getCock=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+        const member=await roomDao.selectCock(roomId);
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "콕 찌를 멤버 조회 성공",
+            result:{
+                member:member
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`콕 찌를 멤버 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
+
+
+
+//콕 찌르기 
+exports.postCock=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    let roomId=req.params.roomId;
+    let todoId=req.params.todoId;
+    let memberId=req.params.memberId;
+
+    if(!roomId){
+        return res.json({
+            isSuccess:false,
+            message:'방 아이디를 입력해주세요',
+            code:435
+        })
+    }
+
+    let regexp=/[^0-9]/g;
+    let regres=roomId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:434,
+            isSuccess:false,
+            message:"방 아이디는 숫자입니다"
+        })
+    }
+
+    roomId=Number(roomId);
+
+    if(!todoId){
+        return res.json({
+            isSuccess:false,
+            message:'할일 아이디를 입력해주세요',
+            code:444
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=todoId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:445,
+            isSuccess:false,
+            message:"할일 아이디는 숫자입니다"
+        })
+    }
+
+    todoId=Number(todoId);
+
+    if(!memberId){
+        return res.json({
+            isSuccess:false,
+            message:'멤버 아이디를 입력해주세요',
+            code:495
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=memberId.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:496,
+            isSuccess:false,
+            message:"멤버 아이디는 숫자입니다"
+        })
+    }
+
+    memberId=Number(memberId);
+
+
+    try{
+        
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+
+        const member=await authDao.selectUserById(memberId);
+
+
+        if(member.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 멤버 아이디입니다',
+                code:403
+            })
+        }
+
+        const room=await roomDao.selectRoom(roomId);
+       
+        if(room.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 방 아이디입니다',
+                code:432
+            })
+        }
+
+
+        const todo=await todoDao.selectTodo(todoId);
+      
+        if(todo.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 할일 아이디입니다',
+                code:445
+            })
+        }
+
+        const message=`${user[0].nickname}님이 ${todo[0].todo}를 부탁해요`;
+
+        await todoDao.insertCock(userId,memberId,message);
+
+
+
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "콕 찌르기 성공"
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`콕 찌르기 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}

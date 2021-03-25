@@ -74,3 +74,13 @@ exports.selectUserInfo=(roomId)=>{
   const param=[roomId];
   return fun1(query,param); 
 }
+
+exports.selectCock=(roomId)=>{
+  const query=`
+  SELECT userId,nickname
+  FROM User INNER JOIN RoomUser ON User.id=RoomUser.userId
+  WHERE RoomUser.roomId=?
+  `
+  const param=[roomId];
+  return fun1(query,param); 
+}

@@ -22,4 +22,11 @@ module.exports = function(app){
     app.get('/room/:roomId/todo/days/search',verify,todo.getDaysSearch);
 
     app.get('/room/:roomId/todo/day/calendar',verify,todo.getDateSearch);
+
+    app.post('/room/:roomId/todo/:todoId/complete',verify,todo.completeTodo);
+
+    app.get('/room/:roomId/todo/today',verify,todo.getTodayTodo);
+
+    app.get('/room/:roomId/todo/member',verify,todo.getCock);
+    app.post('/room/:roomId/todo/:todoId/member/:memberId',verify,todo.postCock);
 };
