@@ -170,9 +170,9 @@ exports.updateCalendar=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
-    const {category,title,content,categoryIdx}=req.body;
+    const {category,title,categoryIdx}=req.body;
 
-    let {time}=req.body;
+    let {time,content}=req.body;
     let roomId=req.params.roomId;
     let calendarId=req.params.calendarId;
 
@@ -272,22 +272,7 @@ exports.updateCalendar=async(req,res)=>{
         })
     }
 
-    if(!content){
-        return res.json({
-            isSuccess:false,
-            message:'내용을 입력해주세요',
-            code:481
-        })
-    }
-    
-    if(typeof(content)!='string'){
-        return res.json({
-            isSuccess:false,
-            message:'내용은 문자열입니다',
-            code:482
-        })
-    }
-
+    if(!content) content="";
     
     if(!calendarId){
         return res.json({

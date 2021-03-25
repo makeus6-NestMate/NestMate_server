@@ -125,3 +125,51 @@ exports.getProfile=async(req,res)=>{
         });
     }
 }
+
+
+
+
+exports.getChart=async(req,res)=>{
+    
+    const userId=req.verifiedToken.id;
+
+    try{
+
+        const user=await authDao.selectUserById(userId);
+
+
+        if(user.length<1){
+            return res.json({
+                isSuccess:false,
+                message:'없는 아이디입니다',
+                code:403
+            })
+        }
+
+
+        const best=await etcDao.selectBestUser(roomId)
+
+    
+        
+        return res.json({
+            isSuccess: true,
+            code: 200,
+            message: "차트 조회 성공",
+            result:{
+
+            }
+        });
+
+
+    }
+    catch(err){
+
+    
+        logger.error(`차트 조회 실패\n: ${err.message}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }
+}
