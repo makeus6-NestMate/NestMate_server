@@ -203,8 +203,7 @@ exports.getProfile=async(req,res)=>{
 
 exports.getChart=async(req,res)=>{
     
-    //const userId=req.verifiedToken.id;
-    const userId=9;
+    const userId=req.verifiedToken.id;
     let roomId=req.params.roomId;
 
     if(!roomId){
