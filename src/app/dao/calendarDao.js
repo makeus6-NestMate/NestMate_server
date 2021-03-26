@@ -38,11 +38,12 @@ exports.deleteCalendar=(calendarId)=>{
     return fun1(query,param);
 }
 
-exports.selectCalendarByDate=(roomId,year,month)=>{
+exports.selectCalendarByDate=(roomId,year,month,page)=>{
     const query= `
       SELECT DISTINCT time
       FROM Calendar
-      WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? 
+      WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=?
+      LIMIT ${page*7},7 
     `;
     const param=[roomId,year,month];
   

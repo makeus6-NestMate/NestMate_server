@@ -122,15 +122,6 @@ exports.selectTodaysTodo=(roomId,day)=>{
 
 
 
-//콕 찌르기 
-exports.insertCock=(userId,memberId,message)=>{
-    const query=`
-    INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?);
-    `
-    const param=[userId,memberId,message];
-    return fun1(query,param); 
-};
-
 
 
 

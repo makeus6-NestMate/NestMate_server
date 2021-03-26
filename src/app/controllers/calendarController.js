@@ -592,6 +592,7 @@ exports.getDetailCalendar=async(req,res)=>{
 
     let roomId=req.params.roomId;
     let date=req.query.date;
+    let page=req.query.page;
 
     if(!roomId){
         return res.json({
@@ -611,6 +612,26 @@ exports.getDetailCalendar=async(req,res)=>{
         })
     }
     roomId=Number(roomId);
+
+    
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
 
 
     if(!date){
@@ -661,7 +682,8 @@ exports.getDetailCalendar=async(req,res)=>{
             })
         }
 
-        const calendar=await calendarDao.selectCalendarByDetailDate(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
+        const calendar=await calendarDao.selectCalendarByDetailDate(roomId,Number(date[0]),Number(date[1]),Number(date[2]),page);
+
 
         for(let _ of calendar){
             _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');

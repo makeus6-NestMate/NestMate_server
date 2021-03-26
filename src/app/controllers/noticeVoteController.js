@@ -836,6 +836,7 @@ exports.getNoticeVote=async(req,res)=>{
 
 
     let roomId=req.params.roomId;
+    let page=req.query.page;
  
     
 
@@ -858,6 +859,24 @@ exports.getNoticeVote=async(req,res)=>{
     }
     roomId=Number(roomId);
 
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
   
   
     try{
@@ -885,8 +904,8 @@ exports.getNoticeVote=async(req,res)=>{
 
         let result=[];
 
-        let notice=await noticeVoteDao.getNotice(roomId);
-        let vote=await noticeVoteDao.getVote(roomId);
+        let notice=await noticeVoteDao.getNotice(roomId,page);
+        let vote=await noticeVoteDao.getVote(roomId,page);
         
         for(let _ of notice){
             let ob=_;
@@ -1128,7 +1147,7 @@ exports.patchVote=async(req,res)=>{
 
 
 
-
+//투표 조회하기
 exports.getVote=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
@@ -1157,10 +1176,6 @@ exports.getVote=async(req,res)=>{
     }
     roomId=Number(roomId);
 
-
- 
-    
-
     if(!voteId){
         return res.json({
             isSuccess:false,
@@ -1169,7 +1184,6 @@ exports.getVote=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=voteId.search(regexp);
     if(regres!=-1){
         return res.json({
@@ -1181,7 +1195,6 @@ exports.getVote=async(req,res)=>{
     voteId=Number(voteId);
 
 
-    const connection = await pool.getConnection(async conn => conn);
     try{
 
         const user=await authDao.selectUserById(userId);
@@ -1218,21 +1231,15 @@ exports.getVote=async(req,res)=>{
         const [unVoteMember]=await noticeVoteDao.selectUnVoteMember(roomId,voteId);
 
         const choices=await noticeVoteDao.selectVoteChoicess(voteId,userId);
-        let choiceId;
-        if(choices.length<1){
-            choiceId=-1;
-        }
-        else{
-            choiceId=choices[0].choiceId;
-        }
-
-
+        
+        
         return res.json({
             isSuccess: true,
             code: 200,
             message: "투표 조회 성공",
             result:{
-                choiceId:choiceId,
+                choiceId:(choices.length<1?-1:choices[0].choiceId),
+                isOwner:(vote[0].userId===userId?true:false),
                 isFinished:vote[0].isFinished,
                 voteTitle:vote[0].title,
                 choice:choice,
@@ -1400,7 +1407,7 @@ exports.getVoteUser=async(req,res)=>{
 
 
 
-
+//투표 마감하기
 exports.completeVote=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
@@ -1430,9 +1437,6 @@ exports.completeVote=async(req,res)=>{
     roomId=Number(roomId);
 
 
- 
-    
-
     if(!voteId){
         return res.json({
             isSuccess:false,
@@ -1441,7 +1445,6 @@ exports.completeVote=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=voteId.search(regexp);
     if(regres!=-1){
         return res.json({

@@ -27,6 +27,9 @@ module.exports = function(app){
 
     app.get('/room/:roomId/todo/today',verify,todo.getTodayTodo);
 
+    // 콕찌를 멤버 가져오기
     app.get('/room/:roomId/todo/member',verify,todo.getCock);
+
+    // 콕찌르기
     app.post('/room/:roomId/todo/:todoId/member/:memberId',verify,todo.postCock);
 };

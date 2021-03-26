@@ -6,6 +6,78 @@ const authDao=require('../dao/authDao');
 const roomDao = require('../dao/roomDao');
 const etcDao=require('../dao/etcDao');
 const moment=require('moment');
+const cron=require('node-cron');
+
+cron.schedule('1 0 * * Mon',async()=>{
+
+    const s=moment().startOf('week').subtract(6,'days').format('YY/MM/DD HH:mm');
+    const e=moment().endOf('week').subtract(6,'days').format('YY/MM/DD HH:mm');
+
+    const rooms=await etcDao.selectAllRoom();
+
+
+    for(let _ of rooms){
+        const members=await etcDao.selectComplete(s,e,_.id);
+
+        let id,num=-1;
+        for(let __ of members){
+            if(__.cnt>num) id=__.user;
+        }
+
+        if(num!=-1){
+
+            const connection = await pool.getConnection(async conn => conn);
+
+            try{
+                await connection.beginTransaction();
+
+                const [user]=await authDao.selectUserById(id);
+    
+                const query1= `
+                UPDATE User SET prizeCnt=prizeCount+1 WHERE id=?  
+                `;
+                const param1=[id];
+                await connection.query(
+                    query1,
+                    param1
+                );
+
+                const query2= `
+                INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?)
+                `;
+                const param2=[id,id,`${user.nickname}님 저번 주 최고의 메이트 축하드립니다`];
+                await connection.query(
+                    query2,
+                    param2
+                );
+
+                await connection.commit();
+                await connection.release();
+    
+            }
+            catch(err){
+                    
+                await connection.rollback();
+                await connection.release();
+                logger.error(`업데이트 실패\n: ${err.message}`);
+    
+    
+            }
+            
+        }
+
+   
+
+
+
+
+    }
+
+    
+})
+
+
+
 
 exports.updateProfile=async(req,res)=>{
     
@@ -183,6 +255,7 @@ exports.getChart=async(req,res)=>{
             bestMember.userId=id;
             bestMember.profileImg=info[0].profileImg;
             bestMember.prizeCount=info[0].prizeCount;
+            bestMember.nickname=info[0].nickname;
         }
         
 

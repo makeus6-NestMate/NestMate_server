@@ -2027,7 +2027,7 @@ exports.getTodayTodo=async(req,res)=>{
 
 
 
-//콕 찌를 멤버 
+//콕 찌를 멤버 가져오기 
 exports.getCock=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
@@ -2077,8 +2077,16 @@ exports.getCock=async(req,res)=>{
             })
         }
 
-        const member=await roomDao.selectCock(roomId);
+        let member=await roomDao.selectCock(roomId);
 
+        let selfIdx=-1;
+        for(let i=0;i<member.length;i++){
+            if(member[i].memberId===userId) selfIdx=i;
+        }
+
+        if(selfIdx!==-1){
+            member.splice(selfIdx,1);
+        }
 
         return res.json({
             isSuccess: true,
@@ -2093,7 +2101,6 @@ exports.getCock=async(req,res)=>{
     }
     catch(err){
 
-    
         logger.error(`콕 찌를 멤버 조회 실패\n: ${err.message}`);
         return res.json({
             message:err.message,
@@ -2142,7 +2149,6 @@ exports.postCock=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=todoId.search(regexp);
     if(regres!=-1){
         return res.json({
@@ -2162,7 +2168,6 @@ exports.postCock=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=memberId.search(regexp);
     if(regres!=-1){
         return res.json({
@@ -2173,6 +2178,9 @@ exports.postCock=async(req,res)=>{
     }
 
     memberId=Number(memberId);
+
+    
+    const connection = await pool.getConnection(async conn => conn);
 
 
     try{
@@ -2188,15 +2196,17 @@ exports.postCock=async(req,res)=>{
             })
         }
 
-        const member=await authDao.selectUserById(memberId);
+        if(memberId!=0){
 
+            const member=await authDao.selectUserById(memberId);
 
-        if(member.length<1){
-            return res.json({
-                isSuccess:false,
-                message:'없는 멤버 아이디입니다',
-                code:403
-            })
+            if(member.length<1){
+                return res.json({
+                    isSuccess:false,
+                    message:'없는 멤버 아이디입니다',
+                    code:403
+                })
+            }
         }
 
         const room=await roomDao.selectRoom(roomId);
@@ -2220,10 +2230,47 @@ exports.postCock=async(req,res)=>{
             })
         }
 
+        
+        
+        await connection.beginTransaction();
+
         const message=`${user[0].nickname}님이 ${todo[0].todo}를 부탁해요`;
 
-        await todoDao.insertCock(userId,memberId,message);
+     
 
+        if(memberId===0){
+            let member=await roomDao.selectCock(roomId);
+
+            for(let _ of member){
+
+                if(_.memberId===userId) continue;
+
+                const query1= `
+                INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?);
+                `;
+                const param1=[userId,_.memberId,message];
+                await connection.query(
+                    query1,
+                    param1
+                );
+            }
+
+        }
+        else{
+            const query2= `
+            INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?);
+            `;
+            const param2=[userId,memberId,message];
+            await connection.query(
+                query2,
+                param2
+            );
+        }
+        
+ 
+
+        await connection.commit();
+        await connection.release();
 
 
         return res.json({
@@ -2236,7 +2283,8 @@ exports.postCock=async(req,res)=>{
     }
     catch(err){
 
-    
+        await connection.rollback();
+        await connection.release();
         logger.error(`콕 찌르기 실패\n: ${err.message}`);
         return res.json({
             message:err.message,

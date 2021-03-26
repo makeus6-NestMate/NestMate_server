@@ -44,7 +44,7 @@ exports.selectMember=(roomId)=>{
 
 exports.selectBestMember=(userId)=>{
     const query=`
-        SELECT profileImg,prizeCount
+        SELECT profileImg,prizeCount,nickname
         FROM User
         WHERE id=?
     `
@@ -70,10 +70,19 @@ exports.selectAlarm=(userId,roomId)=>{
 
 exports.insertClap=(userId,memberId,message)=>{
     const query=`
-    INSERT INTO Alarm(receiverId,senderId,message) VALUES(?,?,?)
+    INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?)
     `
     const param=[userId,memberId,message];
     return fun1(query,param); 
 };
 
 
+exports.selectAllRoom=()=>{
+    const query=`
+      SELECT * FROM Room
+    `
+    const param=[];
+  
+    return fun1(query,param); 
+  };
+  

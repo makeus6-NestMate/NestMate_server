@@ -75,9 +75,10 @@ exports.selectUserInfo=(roomId)=>{
   return fun1(query,param); 
 }
 
+// 방에 있는 멤버 가져오기
 exports.selectCock=(roomId)=>{
   const query=`
-  SELECT userId,nickname
+  SELECT userId AS memberId,nickname
   FROM User INNER JOIN RoomUser ON User.id=RoomUser.userId
   WHERE RoomUser.roomId=?
   `
