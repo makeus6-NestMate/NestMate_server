@@ -33,7 +33,7 @@ exports.updateMemo=(memoId,memo,memoColor)=>{
     const query=`
     UPDATE Memo SET memo=? AND memoColor=? WHERE memoId=?
     `
-    const param=[memo,memoColor,width,height,memoId];
+    const param=[memo,memoColor,memoId];
     return fun1(query,param); 
 };
 

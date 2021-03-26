@@ -2,7 +2,7 @@ const {fun1}=require('../../../config/functions');
 
 exports.updateProfile=(userId,nickname,img)=>{
     const query=`
-    UPDATE User SET nickname=?,img=? WHERE id=?
+    UPDATE User SET nickname=?,profileImg=? WHERE id=?
     `
     const param=[nickname,img,userId];
     return fun1(query,param); 
