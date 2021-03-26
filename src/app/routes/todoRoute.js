@@ -25,6 +25,7 @@ module.exports = function(app){
 
     app.post('/room/:roomId/todo/:todoId/complete',verify,todo.completeTodo);
 
+    //오늘 할일 가져오기
     app.get('/room/:roomId/todo/today',verify,todo.getTodayTodo);
 
     // 콕찌를 멤버 가져오기

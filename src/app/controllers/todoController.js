@@ -1977,9 +1977,6 @@ exports.getTodayTodo=async(req,res)=>{
             if(!_.profileImg) _.profileImg="";
 
             _.deadline=moment(_.deadline).format('YYYY/MM/DD/HH/mm');
-            let t=_.deadline.split('/');
-            console.log(t);
-            _.deadline=t[3]+'/'+t[4];
 
             result.push(_);
 
