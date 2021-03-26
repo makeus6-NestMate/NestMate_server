@@ -121,7 +121,7 @@ exports.selectTodaysTodo=(roomId,day)=>{
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     INNER JOIN TodoRepeatDay ON Todo.id=TodoRepeatDay.todoId
     LEFT OUTER JOIN 
-    (SELECT profileImg,todoId
+    (SELECT profileImg,todoId,nickname
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS  completeUser
     ON TodoRepeatTime.todoId=completeUser.todoId
     WHERE Todo.roomId=? AND Todo.isRepeat=? AND TodoRepeatDay.day=?

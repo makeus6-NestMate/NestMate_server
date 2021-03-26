@@ -2002,7 +2002,7 @@ exports.getTodayTodo=async(req,res)=>{
             if(!_.nickname) _.nickname="";
     
             let t=_.deadline.split(':');
-            console.log(t);
+            
             _.deadline=t[0]+'/'+t[1];
 
             result.push(_);
