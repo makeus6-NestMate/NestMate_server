@@ -203,7 +203,8 @@ exports.getProfile=async(req,res)=>{
 
 exports.getChart=async(req,res)=>{
     
-    const userId=req.verifiedToken.id;
+    //const userId=req.verifiedToken.id;
+    const userId=9;
     let roomId=req.params.roomId;
 
     if(!roomId){
@@ -243,7 +244,7 @@ exports.getChart=async(req,res)=>{
         const e=moment().endOf('week').subtract(6,'days').format('YY/MM/DD HH:mm');
 
         const members=await etcDao.selectComplete(s,e,roomId);
-
+      
         let id,num=-1;
         for(let _ of members){
             if(_.cnt>num){

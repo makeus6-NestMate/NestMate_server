@@ -23,6 +23,7 @@ module.exports = function(app){
 
     app.get('/room/:roomId/todo/day/calendar',verify,todo.getDateSearch);
 
+    //할일 완료
     app.post('/room/:roomId/todo/:todoId/complete',verify,todo.completeTodo);
 
     //오늘 할일 가져오기

@@ -1850,7 +1850,6 @@ exports.completeTodo=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=todoId.search(regexp);
     if(regres!=-1){
         return res.json({
@@ -1894,7 +1893,19 @@ exports.completeTodo=async(req,res)=>{
             })
         }
 
+        const complete=await todoDao.selectComplete(todoId);
+        if(complete.length>0){
+            return res.json({
+                isSuccess:false,
+                message:'이미 한일 입니다',
+                code:497
+            })
+        }
+
+
         await todoDao.completeTodo(todoId,userId);
+
+
 
         
         return res.json({
@@ -1975,6 +1986,7 @@ exports.getTodayTodo=async(req,res)=>{
         for(let _ of todo){
             
             if(!_.profileImg) _.profileImg="";
+            if(!_.nickname) _.nickname="";
 
             _.deadline=moment(_.deadline).format('YYYY/MM/DD/HH/mm');
 
@@ -1987,6 +1999,7 @@ exports.getTodayTodo=async(req,res)=>{
         for(let _ of todos){
             
             if(!_.profileImg) _.profileImg="";
+            if(!_.nickname) _.nickname="";
     
             let t=_.deadline.split(':');
             console.log(t);

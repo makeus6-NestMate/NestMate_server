@@ -80,6 +80,16 @@ exports.selectTodo=(todoId)=>{
     return fun1(query,param); 
 };
 
+//할일 마친 여부
+exports.selectComplete=(todoId)=>{
+    const query=`
+    SELECT * FROM TodoUser WHERE todoId=?
+    `
+    const param=[todoId];
+    return fun1(query,param); 
+};
+
+
 //할일 마치기
 exports.completeTodo=(todoId,userId)=>{
     const query=`
@@ -92,10 +102,10 @@ exports.completeTodo=(todoId,userId)=>{
 //오늘 하루 할일 가져오기
 exports.selectTodayTodo=(roomId,year,month,day)=>{
     const query=`
-    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo
+    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
     LEFT OUTER JOIN 
-    (SELECT profileImg,todoId
+    (SELECT profileImg,todoId,nickname
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS completeUser
     ON TodoTime.todoId=completeUser.todoId
     WHERE Todo.roomId=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?  
@@ -107,7 +117,7 @@ exports.selectTodayTodo=(roomId,year,month,day)=>{
 //오늘 반복 할일 가져오기
 exports.selectTodaysTodo=(roomId,day)=>{
     const query=`
-    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo
+    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     INNER JOIN TodoRepeatDay ON Todo.id=TodoRepeatDay.todoId
     LEFT OUTER JOIN 

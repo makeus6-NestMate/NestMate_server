@@ -542,10 +542,22 @@ exports.getMember = async(req, res)=> {
 
         const member=await roomDao.getMember(roomId);
         
-        for(let _ of member){
-            if(_.userId===userId)   _.isSelf=true;
-            else _.isSelf=false;
+        let selfIdx=-1;
+        let ob={};
+        for(let i=0;i<member.length;i++){
+            if(member[i].userId===userId){
+                selfIdx=i;
+                ob.nickname=member[i].nickname;
+                ob.userId=member[i].userId;
+                ob.profileImg=member[i].profileImg;
+            }
         }
+
+        if(selfIdx!==-1){
+            member.splice(selfIdx,1);
+            member.unshift(ob);
+        }
+
         
         return res.json({
             isSuccess: true,
