@@ -46,7 +46,7 @@ exports.getNotice=(roomId,page)=>{
     const query=`
     SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt
     FROM Notice INNER JOIN User ON Notice.userId=User.id
-    LIMTIT ${page*3},3
+    LIMIT ${page*3},3
     `
     const param=[roomId];
     return fun1(query,param); 
