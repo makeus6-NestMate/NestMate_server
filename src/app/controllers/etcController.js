@@ -246,7 +246,10 @@ exports.getChart=async(req,res)=>{
 
         let id,num=-1;
         for(let _ of members){
-            if(_.cnt>num) id=_.user;
+            if(_.cnt>num){
+                id=_.userId;
+                num=_.cnt;
+            }
         }
 
         let bestMember={};
