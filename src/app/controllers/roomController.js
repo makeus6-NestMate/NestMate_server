@@ -337,6 +337,26 @@ exports.getRoom=async(req,res)=>{
     
     const userId=req.verifiedToken.id;
 
+    let page=req.query.page;
+
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    const regexp=/[^0-9]/g;
+    const regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
 
     try{
 
@@ -353,7 +373,7 @@ exports.getRoom=async(req,res)=>{
 
         let roomInfo=[];
         
-        const rooms=await roomDao.selectRoomByUser(userId);
+        const rooms=await roomDao.selectRoomByUser(userId,page);
         for(let _ of rooms){
             let ob={};
             ob.roomId=_.id;

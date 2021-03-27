@@ -54,11 +54,12 @@ exports.selectRoomUser=(roomId,userId)=>{
   return fun1(query,param); 
 }
 
-exports.selectRoomByUser=(userId)=>{
+exports.selectRoomByUser=(userId,page)=>{
   const query=`
   SELECT Room.id,Room.color,Room.name
   FROM RoomUser INNER JOIN Room ON RoomUser.roomId=Room.id
-  WHERE RoomUser.userId=?;
+  WHERE RoomUser.userId=?
+  LIMIT ${page*4},4
   `
   const param=[userId];
   return fun1(query,param); 

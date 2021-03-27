@@ -1,59 +1,64 @@
 const {fun1}=require('../../../config/functions');
 
 // 마감일이 지나지않고 완료 안된 하루 할일 조회
-exports.selectDayTodo=(roomId)=>{
+exports.selectDayTodo=(roomId,page)=>{
     const query=`
     SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
     LEFT OUTER JOIN TodoUser ON Todo.id=TodoUser.todoId
-    WHERE Todo.roomId=? AND isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null;
+    WHERE Todo.roomId=? AND isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null
+    LIMIT ${page*10},10
     `
     const param=[roomId,'N'];
     return fun1(query,param); 
 };
 
 // 마감일이 지나지않고 완료 안된 하루 할일 조회 + 검색어 포함
-exports.selectDaySearch=(roomId,keyword)=>{
+exports.selectDaySearch=(roomId,keyword,page)=>{
     const query=`
     SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
     LEFT OUTER JOIN TodoUser ON Todo.id=TodoUser.todoId
     WHERE Todo.roomId=? AND isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null AND Todo.todo LIKE '%${keyword}%'
+    LIMIT ${page*10},10
     `
     const param=[roomId,'N'];
     return fun1(query,param); 
 };
 
 //  반복 할일 조회
-exports.selectDaysTodo=(roomId)=>{
+exports.selectDaysTodo=(roomId,page)=>{
     const query=`
     SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
-    WHERE Todo.roomId=? AND isRepeat=? 
+    WHERE Todo.roomId=? AND isRepeat=?
+    LIMIT ${page*10},10 
     `
     const param=[roomId,'Y'];
     return fun1(query,param); 
 };
 
 //  반복 할일 조회 + 검색어 포함
-exports.selectDaysSearch=(roomId,keyword)=>{
+exports.selectDaysSearch=(roomId,keyword,page)=>{
     const query=`
     SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     WHERE Todo.roomId=? AND isRepeat=? AND Todo.todo LIKE '%${keyword}%'
+    LIMIT ${page*10},10
     `
     const param=[roomId,'Y'];
     return fun1(query,param); 
 };
 
 // 마감일이 지나지않고 완료 안된 하루 할일 조회 + 날짜포함
-exports.selectDateSearch=(roomId,year,month,day)=>{
+exports.selectDateSearch=(roomId,year,month,day,page)=>{
     const query=`
     SELECT Todo.id AS todoId,todo,deadline
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
     LEFT OUTER JOIN TodoUser ON Todo.id=TodoUser.todoId
     WHERE Todo.roomId=? AND isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null
-    AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?;
+    AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?
+    LIMIT ${page*10},10
     `
     const param=[roomId,'N',year,month,day];
     return fun1(query,param); 
@@ -100,7 +105,7 @@ exports.completeTodo=(todoId,userId)=>{
 };
 
 //오늘 하루 할일 가져오기
-exports.selectTodayTodo=(roomId,year,month,day)=>{
+exports.selectTodayTodo=(roomId,year,month,day,page)=>{
     const query=`
     SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
@@ -108,14 +113,15 @@ exports.selectTodayTodo=(roomId,year,month,day)=>{
     (SELECT profileImg,todoId,nickname
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS completeUser
     ON TodoTime.todoId=completeUser.todoId
-    WHERE Todo.roomId=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?  
+    WHERE Todo.roomId=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?
+    LIMIT ${page*5},5  
     `
     const param=[roomId,'N',year,month,day];
     return fun1(query,param); 
 };
 
 //오늘 반복 할일 가져오기
-exports.selectTodaysTodo=(roomId,day)=>{
+exports.selectTodaysTodo=(roomId,day,page)=>{
     const query=`
     SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
@@ -125,6 +131,7 @@ exports.selectTodaysTodo=(roomId,day)=>{
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS  completeUser
     ON TodoRepeatTime.todoId=completeUser.todoId
     WHERE Todo.roomId=? AND Todo.isRepeat=? AND TodoRepeatDay.day=?
+    LIMIT ${page*5},5
     `
     const param=[roomId,'Y',day];
     return fun1(query,param); 

@@ -379,6 +379,7 @@ exports.getDayTodo=async(req,res)=>{
     const userId=req.verifiedToken.id;
 
     let roomId=req.params.roomId;
+    let page=req.query.page;
 
     if(!roomId){
         return res.json({
@@ -400,6 +401,23 @@ exports.getDayTodo=async(req,res)=>{
 
     roomId=Number(roomId);
 
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
 
     try{
         
@@ -423,7 +441,7 @@ exports.getDayTodo=async(req,res)=>{
             })
         }
 
-        let todo=await todoDao.selectDayTodo(roomId);
+        let todo=await todoDao.selectDayTodo(roomId,page);
 
         for(let _ of todo){
           
@@ -463,6 +481,8 @@ exports.getDaysTodo=async(req,res)=>{
 
     let roomId=req.params.roomId;
 
+    let page=req.query.page;
+
     if(!roomId){
         return res.json({
             isSuccess:false,
@@ -483,6 +503,24 @@ exports.getDaysTodo=async(req,res)=>{
 
     roomId=Number(roomId);
 
+
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
 
     try{
         
@@ -506,7 +544,7 @@ exports.getDaysTodo=async(req,res)=>{
             })
         }
 
-        const todo=await todoDao.selectDaysTodo(roomId);
+        const todo=await todoDao.selectDaysTodo(roomId,page);
 
         for(let _ of todo){
             
@@ -1513,6 +1551,7 @@ exports.getDaySearch=async(req,res)=>{
 
     let roomId=req.params.roomId;
     const keyword=req.query.keyword;
+    let page=req.query.page;
 
     if(!roomId){
         return res.json({
@@ -1542,6 +1581,24 @@ exports.getDaySearch=async(req,res)=>{
         })
     }
 
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
+
     try{
         
         const user=await authDao.selectUserById(userId);
@@ -1564,7 +1621,7 @@ exports.getDaySearch=async(req,res)=>{
             })
         }
 
-        let todo=await todoDao.selectDaySearch(roomId,keyword);
+        let todo=await todoDao.selectDaySearch(roomId,keyword,page);
 
         for(let _ of todo){
           
@@ -1604,6 +1661,8 @@ exports.getDaysSearch=async(req,res)=>{
 
     let roomId=req.params.roomId;
     const keyword=req.query.keyword;
+    let page=req.query.page;
+
     if(!roomId){
         return res.json({
             isSuccess:false,
@@ -1632,6 +1691,24 @@ exports.getDaysSearch=async(req,res)=>{
         })
     }
 
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
+
 
     try{
         
@@ -1655,7 +1732,7 @@ exports.getDaysSearch=async(req,res)=>{
             })
         }
 
-        const todo=await todoDao.selectDaysSearch(roomId,keyword);
+        const todo=await todoDao.selectDaysSearch(roomId,keyword,page);
 
         for(let _ of todo){
             
@@ -1712,6 +1789,7 @@ exports.getDateSearch=async(req,res)=>{
 
     let roomId=req.params.roomId;
     let date=req.query.date;
+    let page=req.query.page;
    
 
     if(!roomId){
@@ -1757,6 +1835,24 @@ exports.getDateSearch=async(req,res)=>{
     }
 
     date=date.split('/');
+
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
   
 
     try{
@@ -1781,7 +1877,7 @@ exports.getDateSearch=async(req,res)=>{
             })
         }
 
-        let todo=await todoDao.selectDateSearch(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
+        let todo=await todoDao.selectDateSearch(roomId,Number(date[0]),Number(date[1]),Number(date[2]),page);
 
         for(let _ of todo){
           
@@ -1934,6 +2030,7 @@ exports.getTodayTodo=async(req,res)=>{
     const userId=req.verifiedToken.id;
 
     let roomId=req.params.roomId;
+    let page=req.query.page;
 
     if(!roomId){
         return res.json({
@@ -1955,6 +2052,24 @@ exports.getTodayTodo=async(req,res)=>{
 
     roomId=Number(roomId);
 
+    
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
 
     try{
         
@@ -1981,7 +2096,7 @@ exports.getTodayTodo=async(req,res)=>{
         const date=new Date();
         const result=[];
    
-        let todo=await todoDao.selectTodayTodo(roomId,date.getFullYear(),date.getMonth()+1,date.getDate());
+        let todo=await todoDao.selectTodayTodo(roomId,date.getFullYear(),date.getMonth()+1,date.getDate(),page);
 
         for(let _ of todo){
             
@@ -1994,7 +2109,7 @@ exports.getTodayTodo=async(req,res)=>{
 
         }
 
-        let todos=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7);
+        let todos=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,page);
 
         for(let _ of todos){
             
