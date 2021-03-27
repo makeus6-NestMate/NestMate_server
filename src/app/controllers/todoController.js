@@ -2095,8 +2095,9 @@ exports.getTodayTodo=async(req,res)=>{
 
         const date=new Date();
         const result=[];
+        const year=date.getFullYear(),month=date.getMonth()+1,day=date.getDate();
    
-        let todo=await todoDao.selectTodayTodo(roomId,date.getFullYear(),date.getMonth()+1,date.getDate(),page);
+        let todo=await todoDao.selectTodayTodo(roomId,year,month,day,page);
 
         for(let _ of todo){
             
@@ -2116,9 +2117,10 @@ exports.getTodayTodo=async(req,res)=>{
             if(!_.profileImg) _.profileImg="";
             if(!_.nickname) _.nickname="";
     
+            
             let t=_.deadline.split(':');
             
-            _.deadline=t[0]+'/'+t[1];
+            _.deadline=year+'/'+month+'/'+day+'/'+t[0]+'/'+t[1];
 
             result.push(_);
 
