@@ -328,6 +328,8 @@ exports.getAlarm=async(req,res)=>{
     const userId=req.verifiedToken.id;
     let roomId=req.params.roomId;
 
+    let page=req.query.page;
+
     if(!roomId){
         return res.json({
             isSuccess:false,
@@ -347,6 +349,26 @@ exports.getAlarm=async(req,res)=>{
     }
     roomId=Number(roomId);
 
+      
+    if(!page){
+        return res.json({
+            code:497,
+            isSuccess:false,
+            message:"페이지 번호를 입력해주세요"
+        })
+    }
+
+    regexp=/[^0-9]/g;
+    regres=page.search(regexp);
+    if(regres!=-1){
+        return res.json({
+            code:498,
+            isSuccess:false,
+            message:"페이지 번호는 숫자입니다"
+        })
+    }
+    page=Number(page);
+
     try{
 
         const user=await authDao.selectUserById(userId);
@@ -360,7 +382,7 @@ exports.getAlarm=async(req,res)=>{
             })
         }
 
-        const alarm=await etcDao.selectAlarm(userId,roomId); 
+        const alarm=await etcDao.selectAlarm(userId,roomId,page); 
         
         for(let _ of alarm){
             _.createdAt=moment(_.createdAt).format('YYYY/MM/DD/HH/mm');

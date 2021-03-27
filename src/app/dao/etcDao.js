@@ -53,7 +53,7 @@ exports.selectBestMember=(userId)=>{
     return fun1(query,param); 
 };
 
-exports.selectAlarm=(userId,roomId)=>{
+exports.selectAlarm=(userId,roomId,page)=>{
     const query=`
 
         SELECT User.profileImg,Send.message,Send.createdAt
@@ -63,6 +63,7 @@ exports.selectAlarm=(userId,roomId)=>{
         INNER JOIN RoomUser ON RoomUser.userId=User.id
         WHERE RoomUser.roomId=? AND User.id=?) Send
         ON User.id=Send.senderId
+        LIMIT ${page*10},10s
     `
     const param=[roomId,userId];
     return fun1(query,param); 
