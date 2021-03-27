@@ -31,7 +31,7 @@ exports.selectMemoById=(memoId)=>{
 
 exports.updateMemo=(memoId,memo,memoColor)=>{
     const query=`
-    UPDATE Memo SET memo=? AND memoColor=? WHERE id=?
+    UPDATE Memo SET memo=?,memoColor=? WHERE id=?
     `
     const param=[memo,memoColor,memoId];
     return fun1(query,param); 

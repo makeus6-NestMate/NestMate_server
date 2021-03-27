@@ -298,7 +298,6 @@ exports.updateMemo=async(req,res)=>{
         })
     }
 
-    regexp=/[^0-9]/g;
     regres=memoId.search(regexp);
     if(regres!=-1){
         return res.json({
@@ -333,22 +332,23 @@ exports.updateMemo=async(req,res)=>{
             })
         }
 
-        let memo=await memoDao.selectMemoById(memoId);
+        let memos=await memoDao.selectMemoById(memoId);
 
-        if(memo.length<1){
+        if(memos.length<1){
             return res.json({
                 isSuccess:false,
                 message:'없는 메모 아이디입니다',
                 code:460
             })
         }
-        if(memo[0].userId!=userId){
+        if(memos[0].userId!=userId){
             return res.json({
                 isSuccess:false,
                 message:'권한이 없습니다',
                 code:458
             })
         }
+
 
         await memoDao.updateMemo(memoId,memo,memoColor);
 
