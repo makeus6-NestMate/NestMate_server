@@ -38,12 +38,11 @@ exports.deleteCalendar=(calendarId)=>{
     return fun1(query,param);
 }
 
-exports.selectCalendarByDate=(roomId,year,month,page)=>{
+exports.selectCalendarByDate=(roomId,year,month)=>{
     const query= `
       SELECT DISTINCT time
       FROM Calendar
       WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=?
-      LIMIT ${page*7},7 
     `;
     const param=[roomId,year,month];
   
@@ -61,11 +60,12 @@ exports.selectCalendarByDate1=(roomId,year,month,day)=>{
   return fun1(query,param);
 }
 
-exports.selectCalendarByDetailDate=(roomId,year,month,day)=>{
+exports.selectCalendarByDetailDate=(roomId,year,month,day,page)=>{
   const query= `
     SELECT category,time,categoryIdx,title,content,id AS calendarId
     FROM Calendar
     WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=? 
+    LIMIT ${page*7},7
   `;
   const param=[roomId,year,month,day];
 

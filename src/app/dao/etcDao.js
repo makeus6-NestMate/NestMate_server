@@ -25,6 +25,7 @@ exports.selectComplete=(start,end,roomId)=>{
         FROM RoomUser INNER JOIN TodoUser ON RoomUser.userId=TodoUser.userId
         WHERE RoomUser.roomId=? AND TodoUser.createdAt BETWEEN ? AND ?
         GROUP BY TodoUser.userId
+        ORDER BY TodoUser.userId
     `
     const param=[roomId,start,end];
     return fun1(query,param); 

@@ -504,6 +504,7 @@ exports.getCalendar=async(req,res)=>{
             code:486
         })
     }
+ 
     
     let cnt=0;
     for(let _ of date){
@@ -519,7 +520,7 @@ exports.getCalendar=async(req,res)=>{
 
     date=date.split('/');
 
-  
+
 
 
   
@@ -544,13 +545,16 @@ exports.getCalendar=async(req,res)=>{
                 code:432
             })
         }
+        
 
         const calendar=await calendarDao.selectCalendarByDate(roomId,Number(date[0]),Number(date[1]));
 
         for(let _ of calendar){
+            console.log(_);
             _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');
 
             const times=_.time.split('/');
+           
             const categories=await calendarDao.selectCalendarByDate1(roomId,times[0],times[1],times[2]);
             _.categories=categories;
 
