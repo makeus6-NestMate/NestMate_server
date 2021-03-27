@@ -107,7 +107,7 @@ exports.completeTodo=(todoId,userId)=>{
 //오늘 하루 할일 가져오기
 exports.selectTodayTodo=(roomId,year,month,day,page)=>{
     const query=`
-    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname
+    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname,"N" AS "isRepeat"
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
     LEFT OUTER JOIN 
     (SELECT profileImg,todoId,nickname
@@ -123,7 +123,7 @@ exports.selectTodayTodo=(roomId,year,month,day,page)=>{
 //오늘 반복 할일 가져오기
 exports.selectTodaysTodo=(roomId,day,page)=>{
     const query=`
-    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname
+    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname,"Y" AS "isRepeat"
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     INNER JOIN TodoRepeatDay ON Todo.id=TodoRepeatDay.todoId
     LEFT OUTER JOIN 
@@ -136,6 +136,8 @@ exports.selectTodaysTodo=(roomId,day,page)=>{
     const param=[roomId,'Y',day];
     return fun1(query,param); 
 };
+
+
 
 
 

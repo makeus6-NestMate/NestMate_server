@@ -552,8 +552,9 @@ exports.getDaysTodo=async(req,res)=>{
             let time=_.deadline.split(':');
             _.deadline=time[0]+'/'+time[1];
 
-            let days=await todoDao.selectDays(todo[0].todoId);
+            let days=await todoDao.selectDays(_.todoId);
             let day='0000000';
+
          
             for(let _ of days){
               
@@ -2095,8 +2096,10 @@ exports.getTodayTodo=async(req,res)=>{
 
         const date=new Date();
         const result=[];
-        const year=date.getFullYear(),month=date.getMonth()+1,day=date.getDate();
-   
+
+        const year=date.getFullYear(),month=date.getMonth(),day=date.getDate();
+        
+
         let todo=await todoDao.selectTodayTodo(roomId,year,month,day,page);
 
         for(let _ of todo){
@@ -2109,6 +2112,7 @@ exports.getTodayTodo=async(req,res)=>{
             result.push(_);
 
         }
+        
 
         let todos=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,page);
 
@@ -2125,7 +2129,7 @@ exports.getTodayTodo=async(req,res)=>{
             result.push(_);
 
         }
-
+        
 
         
 
