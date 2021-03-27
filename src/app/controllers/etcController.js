@@ -85,13 +85,7 @@ exports.updateProfile=async(req,res)=>{
 
     const {nickname}=req.body;
 
-    if(!req.file||!req.file.location){
-        return res.json({
-            isSuccess:false,
-            message:'사진을 입력해주세요',
-            code:425
-        })
-    }
+  
 
     if(!nickname){
         return res.json({
@@ -122,7 +116,7 @@ exports.updateProfile=async(req,res)=>{
             })
         }
         let img;
-        if(!req.file.location) img=user[0].profileImg;
+        if(!req.file||!req.file.location) img=user[0].profileImg;
         else img=req.file.location;
 
         await etcDao.updateProfile(userId,nickname,img);
