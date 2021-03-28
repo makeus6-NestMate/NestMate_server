@@ -48,6 +48,7 @@ exports.selectBestMember=(userId)=>{
         SELECT profileImg,prizeCount,nickname
         FROM User
         WHERE id=?
+        ORDER BY id;
     `
     const param=[userId];
     return fun1(query,param); 
@@ -63,7 +64,7 @@ exports.selectAlarm=(userId,roomId,page)=>{
         INNER JOIN RoomUser ON RoomUser.userId=User.id
         WHERE RoomUser.roomId=? AND User.id=?) Send
         ON User.id=Send.senderId
-        LIMIT ${page*10},10s
+        LIMIT ${page*10},10
     `
     const param=[roomId,userId];
     return fun1(query,param); 

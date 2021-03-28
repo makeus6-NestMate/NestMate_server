@@ -10,7 +10,7 @@ exports.selectUserByEmail=(email)=>{
 
 exports.selectUserById=(id)=>{
   const query=`
-    SELECT * FROM User WHERE id=?;
+    SELECT * FROM User WHERE id=?
   `;
   const param=[id];
   return fun1(query,param);

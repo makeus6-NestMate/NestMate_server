@@ -2100,7 +2100,7 @@ exports.getTodayTodo=async(req,res)=>{
         const year=date.getFullYear(),month=date.getMonth(),day=date.getDate();
         
 
-        let todo=await todoDao.selectTodayTodo(roomId,year,month,day,page);
+        let todo=await todoDao.selectTodayTodo(roomId,year,month+1,day,page);
 
         for(let _ of todo){
             
