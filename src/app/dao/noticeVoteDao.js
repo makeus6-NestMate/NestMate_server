@@ -46,6 +46,7 @@ exports.getNotice=(roomId,page)=>{
     const query=`
     SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt
     FROM Notice INNER JOIN User ON Notice.userId=User.id
+    WHERE Notice.roomId=?
     LIMIT ${page*3},3
     `
     const param=[roomId];
@@ -57,6 +58,7 @@ exports.getVote=(roomId,page)=>{
     const query=`
     SELECT profileImg,Vote.id AS voteId , title , Vote.createdAt, isFinished
     FROM Vote INNER JOIN User ON Vote.userId=User.id
+    WHERE Vote.roomId=?
     LIMIT ${page*4},4
     `
     const param=[roomId];
