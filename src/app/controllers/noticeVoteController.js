@@ -911,6 +911,8 @@ exports.getNoticeVote=async(req,res)=>{
             let ob=_;
             ob.isNotice='Y';
             ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
+            ob.isOwner=(userId===ob.userId?"Y":"N");
+            delete ob.userId;
             result.push(ob);
         }
 
@@ -918,7 +920,9 @@ exports.getNoticeVote=async(req,res)=>{
             let ob=_;
             ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
             ob.isNotice='N';
+            ob.isOwner=(userId===ob.userId?"Y":"N");
             ob.isFinished=_.isFinished;
+            delete ob.userId;
             result.push(ob);
         }
 

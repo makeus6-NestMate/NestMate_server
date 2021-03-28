@@ -44,7 +44,7 @@ exports.deleteNotice=(noticeId)=>{
 
 exports.getNotice=(roomId,page)=>{
     const query=`
-    SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt
+    SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt,User.id AS userId
     FROM Notice INNER JOIN User ON Notice.userId=User.id
     WHERE Notice.roomId=?
     LIMIT ${page*3},3
@@ -56,7 +56,7 @@ exports.getNotice=(roomId,page)=>{
 
 exports.getVote=(roomId,page)=>{
     const query=`
-    SELECT profileImg,Vote.id AS voteId , title , Vote.createdAt, isFinished
+    SELECT profileImg,Vote.id AS voteId , title , Vote.createdAt, isFinished,User.id AS userId
     FROM Vote INNER JOIN User ON Vote.userId=User.id
     WHERE Vote.roomId=?
     LIMIT ${page*4},4
