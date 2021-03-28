@@ -8,5 +8,6 @@ module.exports = function(app){
     app.post('/check/email',auth.checkEmail);
     app.post('/login',auth.signIn);
 
+    app.post('/kakao',auth.kakao);
     
 };

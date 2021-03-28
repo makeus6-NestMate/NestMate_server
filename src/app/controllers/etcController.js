@@ -7,6 +7,7 @@ const roomDao = require('../dao/roomDao');
 const etcDao=require('../dao/etcDao');
 const moment=require('moment');
 const cron=require('node-cron');
+const schedule=require('node-schedule');
 
 cron.schedule('1 0 * * Mon',async()=>{
 
@@ -14,17 +15,20 @@ cron.schedule('1 0 * * Mon',async()=>{
     const e=moment().endOf('week').subtract(6,'days').format('YY/MM/DD HH:mm');
 
     const rooms=await etcDao.selectAllRoom();
-
-
+  
     for(let _ of rooms){
         const members=await etcDao.selectComplete(s,e,_.id);
-
+       
         let id,num=-1;
         for(let __ of members){
-            if(__.cnt>num) id=__.user;
+            if(__.cnt>num){
+                id=__.userId;
+                num=__.cnt;
+            }
         }
 
         if(num!=-1){
+            
 
             const connection = await pool.getConnection(async conn => conn);
 
@@ -32,9 +36,10 @@ cron.schedule('1 0 * * Mon',async()=>{
                 await connection.beginTransaction();
 
                 const [user]=await authDao.selectUserById(id);
+              
     
                 const query1= `
-                UPDATE User SET prizeCnt=prizeCount+1 WHERE id=?  
+                UPDATE User SET prizeCount=prizeCount+1 WHERE id=?  
                 `;
                 const param1=[id];
                 await connection.query(
@@ -51,9 +56,35 @@ cron.schedule('1 0 * * Mon',async()=>{
                     param2
                 );
 
+                const query3= `
+                SELECT MAX(id) AS alarmId FROM Alarm;
+                `;
+                const param3=[];
+                const [[alarmId]]=await connection.query(
+                    query3,
+                    param3
+                );
+
+                let end=new Date();
+                end.setDate(end.getDate()+2);
+
+                schedule.scheduleJob(end,async()=>{
+                    const query4= `
+                    DELETE FROM Alarm id=?  
+                    `;
+                    const param4=[alarmId.alarmId];
+                    await connection.query(
+                        query4,
+                        param4
+                    );
+                })
+
+
+
                 await connection.commit();
                 await connection.release();
     
+                console.log()
             }
             catch(err){
                     
@@ -456,6 +487,9 @@ exports.postClap=async(req,res)=>{
     }
     memberId=Number(memberId);
 
+    
+    const connection = await pool.getConnection(async conn => conn);
+
     try{
 
         const user=await authDao.selectUserById(userId);
@@ -480,10 +514,44 @@ exports.postClap=async(req,res)=>{
             })
         }
 
+        await connection.beginTransaction();
 
 
-        await etcDao.insertClap(userId,memberId,`${user[0].nickname}님이 최고의 메이트에 박수를 보냈습니다`); 
+        const query1=`
+        INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?)
+        `
+        const param1=[userId,memberId,`${user[0].nickname}님이 최고의 메이트에 박수를 보냈습니다`];
+        await connection.query(
+            query1,
+            param1
+        );
 
+        const query2=`
+        SELECT MAX(id) AS alarmId FROM Alarm
+        `
+        const param2=[];
+        const [[alarmId]]=await connection.query(
+            query2,
+            param2
+        );
+        
+        let end=new Date();
+        end.setDate(end.getDate()+2);
+
+        schedule.scheduleJob(end,async()=>{
+            const query3= `
+            DELETE FROM Alarm id=?  
+            `;
+            const param3=[alarmId.alarmId];
+            await connection.query(
+                query3,
+                param3
+            );
+        })
+
+        
+        await connection.commit();
+        await connection.release();
 
 
         return res.json({
@@ -495,6 +563,8 @@ exports.postClap=async(req,res)=>{
 
     }
     catch(err){
+        await connection.rollback();
+        await connection.release();
         logger.error(`박수 보내기 실패\n: ${err.message}`);
         return res.json({
             message:err.message,

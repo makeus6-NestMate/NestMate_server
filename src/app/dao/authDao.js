@@ -32,3 +32,11 @@ exports.selectUserByPhone=(phoneNumber)=>{
   const param=[phoneNumber];
   return fun1(query,param);
 }
+
+exports.insertUserInfoKakao=(email,nickname,profileImg)=>{
+  const query= `
+    INSERT INTO User(email,profileImg,nickname,prizeCount) VALUES(?,?,?,0);
+  `;
+  const param=[email,profileImg,nickname];
+  return fun1(query,param);
+}

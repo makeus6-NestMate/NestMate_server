@@ -26,7 +26,10 @@
     "multer-s3": "^2.9.0",
     "mysql2": "^2.0.0",
     "node-cron": "^3.0.0",
+    "node-schedule": "^2.0.0",
     "regex-email": "^1.0.2",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "twilio": "^3.57.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"

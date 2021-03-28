@@ -71,14 +71,6 @@ exports.selectAlarm=(userId,roomId,page)=>{
 };
 
 
-exports.insertClap=(userId,memberId,message)=>{
-    const query=`
-    INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?)
-    `
-    const param=[userId,memberId,message];
-    return fun1(query,param); 
-};
-
 
 exports.selectAllRoom=()=>{
     const query=`

@@ -12,6 +12,8 @@ var twilio=require('twilio');
 var client=new twilio(process.env.ACCOUNT_SID,process.env.AUTH_TOKEN);
 var phoneNumberMap=new Map();
 
+const rp=require('request-promise');
+
 
 exports.signUp = async(req, res)=> {
 
@@ -436,6 +438,7 @@ exports.checkEmail=async(req,res)=>{
         const userByEmail=await authDao.selectUserByEmail(email);
 
         if(userByEmail.length>0){
+
             return res.json({
                 isSuccess:true,
                 message:'중복된 이메일입니다',
@@ -462,3 +465,75 @@ exports.checkEmail=async(req,res)=>{
 
 
 };
+
+
+
+
+exports.kakao=async(req,res)=>{
+
+    const accessToken=req.headers.access_token;
+
+    const options={
+        uri:"https://kapi.kakao.com/v2/user/me",
+        method:"GET",
+        headers:{
+            "Authorization":`Bearer ${accessToken}`,
+            "content-type" : "application/x-www-form-urlencoded"
+        },
+        json:true
+    }
+    
+
+    try{
+        const cb=await rp(options);
+
+        const email=cb.kakao_account.email;
+        const nickname=cb.kakao_account.profile.nickname;
+        const profileImg=cb.kakao_account.profile.profile_image_url;
+
+        const userByEmail=await authDao.selectUserByEmail(email);
+
+        if(userByEmail.length>0){
+
+
+            var token = await jwt.sign({
+                id: userByEmail[0].id,
+            }, 
+            process.env.JWT, 
+            {
+                expiresIn: '365d',
+                subject: 'userInfo',
+            });
+
+            return res.json({
+                isSuccess:true,
+                message:'카카오 로그인 성공',
+                code:200,
+                result:{
+                    token:token
+                }
+            });
+            
+        }
+        else{
+            await authDao.insertUserInfoKakao(email,nickname,profileImg?profileImg:"");
+
+            return res.json({
+                isSuccess:true,
+                message:'카카오 회원가입 성공',
+                code:200
+            });
+        }
+      
+    }
+    catch(err){
+        logger.error(`카카오 회원가입/로그인 실패\n: ${JSON.stringify(err)}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }   
+
+};
+

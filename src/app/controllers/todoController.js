@@ -5,6 +5,7 @@ const todoDao = require('../dao/todoDao');
 const authDao=require('../dao/authDao');
 const roomDao = require('../dao/roomDao');
 const moment=require('moment');
+const schedule=require('node-schedule');
 
 exports.createDayTodo=async(req,res)=>{
     
@@ -2384,18 +2385,65 @@ exports.postCock=async(req,res)=>{
                     query1,
                     param1
                 );
+
+                const query2=`
+                SELECT MAX(id) AS alarmId FROM Alarm
+                `
+                const param2=[];
+                const [[alarmId]]=await connection.query(
+                    query2,
+                    param2
+                );
+                
+                let end=new Date();
+                end.setDate(end.getDate()+2);
+        
+                schedule.scheduleJob(end,async()=>{
+                    const query3= `
+                    DELETE FROM Alarm id=?  
+                    `;
+                    const param3=[alarmId.alarmId];
+                    await connection.query(
+                        query3,
+                        param3
+                    );
+                })
+
             }
 
         }
         else{
-            const query2= `
+            const query3= `
             INSERT INTO Alarm(senderId,receiverId,message) VALUES(?,?,?);
             `;
-            const param2=[userId,memberId,message];
+            const param3=[userId,memberId,message];
             await connection.query(
-                query2,
-                param2
+                query3,
+                param3
             );
+
+            const query4=`
+            SELECT MAX(id) AS alarmId FROM Alarm
+            `
+            const param4=[];
+            const [[alarmId]]=await connection.query(
+                query4,
+                param4
+            );
+            
+            let end=new Date();
+            end.setDate(end.getDate()+2);
+    
+            schedule.scheduleJob(end,async()=>{
+                const query5= `
+                DELETE FROM Alarm id=?  
+                `;
+                const param5=[alarmId.alarmId];
+                await connection.query(
+                    query5,
+                    param5
+                );
+            })
         }
         
  
