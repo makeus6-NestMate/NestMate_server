@@ -153,15 +153,6 @@ exports.selectVoteChoicess=(voteId,userId)=>{
 };
 
 
-exports.completeVote=(voteId)=>{
-    const query= `
-    UPDATE Vote SET isFinished=? WHERE id=?
-    `;
-
-    const param=['Y',voteId];
-    return fun1(query,param);
-};
-
 
 
 

@@ -221,7 +221,7 @@ exports.signIn = async (req, res)=> {
 
 
 
-        var token = await jwt.sign({
+        let token = await jwt.sign({
                 id: userByEmail[0].id,
             }, 
             process.env.JWT, 
@@ -469,7 +469,53 @@ exports.checkEmail=async(req,res)=>{
 
 
 
-exports.kakao=async(req,res)=>{
+exports.kakaoUser=async(req,res)=>{
+
+    
+    const {
+        email, nickname,profileImg
+    } = req.body;
+
+    if (!email){
+        return res.json({
+            isSuccess: false, 
+            code: 416, 
+            message: "이메일을 입력해주세요."
+        });
+    }
+
+    if (!regexEmail.test(email)){
+        return res.json({
+            isSuccess: false,
+            code:417,
+            message: "이메일을 형식을 지켜주세요"
+        });
+    }
+
+    
+    if(!profileImg){
+        return res.json({
+            code:425,
+            isSuccess:false,
+            message:'사진을 입력해주세요'
+        })
+    }
+
+    if(!nickname){
+        return res.json({
+            code:426,
+            isSuccess:false,
+            message:'닉네임 입력해주세요'
+        })
+    }
+
+    if(typeof(nickname)!='string'){
+        return res.json({
+            code:427,
+            isSuccess:false,
+            message:'닉네임은 문자열입니다'
+        })
+    }
 
     const accessToken=req.headers.access_token;
 
@@ -487,47 +533,136 @@ exports.kakao=async(req,res)=>{
     try{
         const cb=await rp(options);
 
-        const email=cb.kakao_account.email;
-        const nickname=cb.kakao_account.profile.nickname;
-        const profileImg=cb.kakao_account.profile.profile_image_url;
+        const kakaoEmail=cb.kakao_account.email;
 
+        if(email!=kakaoEmail){
+            return res.json({
+                isSuccess:true,
+                message:'카카오 로그인 실패',
+                code:408
+            });
+        }
+        
         const userByEmail=await authDao.selectUserByEmail(email);
 
         if(userByEmail.length>0){
-
-
-            var token = await jwt.sign({
-                id: userByEmail[0].id,
-            }, 
-            process.env.JWT, 
-            {
-                expiresIn: '365d',
-                subject: 'userInfo',
-            });
-
             return res.json({
                 isSuccess:true,
-                message:'카카오 로그인 성공',
-                code:200,
-                result:{
-                    token:token
-                }
-            });
-            
+                message:'중복된 이메일입니다',
+                code:418
+            })
         }
-        else{
-            await authDao.insertUserInfoKakao(email,nickname,profileImg?profileImg:"");
+        
+        await authDao.insertUserInfoKakao(email,nickname,profileImg);
 
-            return res.json({
-                isSuccess:true,
-                message:'카카오 회원가입 성공',
-                code:200
-            });
-        }
+        return res.json({
+            isSuccess:true,
+            message:'카카오 회원가입 성공',
+            code:200
+        });
+        
       
     }
     catch(err){
-        logger.error(`카카오 회원가입/로그인 실패\n: ${JSON.stringify(err)}`);
+        logger.error(`카카오 회원가입\n: ${JSON.stringify(err)}`);
+        return res.json({
+            message:err.message,
+            code:500,
+            isSuccess:false
+        });
+    }   
+
+};
+
+
+
+
+exports.kakaoLogin=async(req,res)=>{
+
+    
+    const {
+        email
+    } = req.body;
+
+    if (!email){
+        return res.json({
+            isSuccess: false, 
+            code: 416, 
+            message: "이메일을 입력해주세요."
+        });
+    }
+
+    if (!regexEmail.test(email)){
+        return res.json({
+            isSuccess: false,
+            code:417,
+            message: "이메일을 형식을 지켜주세요"
+        });
+    }
+
+
+    const accessToken=req.headers.access_token;
+
+    const options={
+        uri:"https://kapi.kakao.com/v2/user/me",
+        method:"GET",
+        headers:{
+            "Authorization":`Bearer ${accessToken}`,
+            "content-type" : "application/x-www-form-urlencoded"
+        },
+        json:true
+    }
+    
+
+    try{
+        const cb=await rp(options);
+
+        const kakaoEmail=cb.kakao_account.email;
+
+        if(email!=kakaoEmail){
+            return res.json({
+                isSuccess:true,
+                message:'카카오 로그인 실패',
+                code:408
+            });
+        }
+        
+        const userByEmail=await authDao.selectUserByEmail(email);
+
+        if(userByEmail.length<1){
+            return res.json({
+                isSuccess:true,
+                message:'존재하지않는 이메일',
+                code:423
+            })
+        }
+
+        let token = await jwt.sign({
+            id: userByEmail[0].id,
+        }, 
+        process.env.JWT, 
+        {
+            expiresIn: '365d',
+            subject: 'userInfo',
+        });
+
+
+        
+        
+
+        return res.json({
+            isSuccess:true,
+            message:'카카오 로그인 성공',
+            code:200,
+            result:{
+                token:token
+            }
+        });
+        
+      
+    }
+    catch(err){
+        logger.error(`카카오 로그인\n: ${JSON.stringify(err)}`);
         return res.json({
             message:err.message,
             code:500,

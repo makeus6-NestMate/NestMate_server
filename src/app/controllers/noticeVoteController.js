@@ -5,8 +5,7 @@ const authDao=require('../dao/authDao');
 const roomDao = require('../dao/roomDao');
 const noticeVoteDao=require('../dao/noticeVoteDao');
 const moment=require('moment');
-
-
+const schedule=require('node-schedule');
 
 exports.postNotice=async(req,res)=>{
     
@@ -1459,6 +1458,7 @@ exports.completeVote=async(req,res)=>{
     }
     voteId=Number(voteId);
 
+    const connection = await pool.getConnection(async conn => conn);
 
     try{
 
@@ -1500,7 +1500,45 @@ exports.completeVote=async(req,res)=>{
             })
         }
 
-        await noticeVoteDao.completeVote(voteId);
+        await connection.beginTransaction();
+
+        const query1= `
+        UPDATE Vote SET isFinished=? WHERE id=?
+        `;
+        const param1=['Y',voteId];
+        await connection.query(
+            query1,
+            param1
+        );
+
+        let end=new Date();
+        end.setDate(end.getDate()+2);
+
+        schedule.scheduleJob(end,async()=>{
+            const query2= `
+            DELETE FROM Vote WHERE id=?
+            `;
+            const param2=[voteId];
+            await connection.query(
+                query2,
+                param2
+            );
+            
+            const query3= `
+            DELETE FROM VoteChoice WHERE voteId=?;
+            `;
+            const param3=[voteId];
+            await connection.query(
+                query3,
+                param3
+            );    
+        })
+
+        
+
+        await connection.commit();
+        await connection.release();
+
 
 
         return res.json({
@@ -1512,6 +1550,9 @@ exports.completeVote=async(req,res)=>{
     }
     catch(err){
 
+        await connection.rollback();
+        await connection.release();
+    
         
         logger.error(`투표 마치기 실패\n: ${err.message}`);
         return res.json({
