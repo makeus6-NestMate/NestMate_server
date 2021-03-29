@@ -60,12 +60,12 @@ exports.selectAlarm=(userId,roomId,page)=>{
 
         SELECT User.profileImg,Send.message,Send.createdAt
         FROM User INNER JOIN
-        (SELECT senderId,message,Alarm.createdAt
+        (SELECT senderId,message,Alarm.createdAt,Alarm.id
         FROM Alarm INNER JOIN User ON Alarm.receiverId=User.id
         INNER JOIN RoomUser ON RoomUser.userId=User.id
         WHERE RoomUser.roomId=? AND User.id=?) Send
         ON User.id=Send.senderId
-        ORDER BY Alarm.id
+        ORDER BY Send.id
         LIMIT ${page*10},10
     `
     const param=[roomId,userId];

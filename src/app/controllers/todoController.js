@@ -2125,7 +2125,7 @@ exports.getTodayTodo=async(req,res)=>{
             
             let t=_.deadline.split(':');
             
-            _.deadline=year+'/'+month+'/'+day+'/'+t[0]+'/'+t[1];
+            _.deadline=year+'/'+(month+1)+'/'+day+'/'+t[0]+'/'+t[1];
 
             result.push(_);
 
