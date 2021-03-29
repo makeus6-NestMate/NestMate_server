@@ -903,6 +903,32 @@ exports.getNoticeVote=async(req,res)=>{
 
         let result=[];
 
+        let noticeVoteId=await noticeVoteDao.getNoticeVoteId(roomId,page);
+
+        for(let _ of noticeVoteId){
+            if(_.noticeId&&!_.voteId){
+
+                let [notice]=await noticeVoteDao.getNotice(roomId,_.noticeId); 
+                notice.isNotice='Y';
+                notice.createdAt=moment(notice.createdAt).format('YY/MM/DD/HH/mm');
+                notice.isOwner=(userId===notice.userId?"Y":"N");
+                delete notice.userId;
+                result.push(notice);
+
+            }
+            else if(!_.noticeId&&_.voteId){
+                let [vote]=await noticeVoteDao.getVote(roomId,_.voteId);
+
+                vote.createdAt=moment(vote.createdAt).format('YY/MM/DD/HH/mm');
+                vote.isNotice='N';
+                vote.isOwner=(userId===vote.userId?"Y":"N");
+                delete vote.userId;
+                result.push(vote);
+            }
+
+        }
+        
+/*
         let notice=await noticeVoteDao.getNotice(roomId,page);
         let vote=await noticeVoteDao.getVote(roomId,page);
         
@@ -923,7 +949,7 @@ exports.getNoticeVote=async(req,res)=>{
             ob.isFinished=_.isFinished;
             delete ob.userId;
             result.push(ob);
-        }
+        }*/
 
 
         

@@ -2098,41 +2098,39 @@ exports.getTodayTodo=async(req,res)=>{
         const date=new Date();
         const result=[];
 
+
+
         const year=date.getFullYear(),month=date.getMonth(),day=date.getDate();
+  
         
-
-        let todo=await todoDao.selectTodayTodo(roomId,year,month+1,day,page);
-
-        for(let _ of todo){
-            
-            if(!_.profileImg) _.profileImg="";
-            if(!_.nickname) _.nickname="";
-
-            _.deadline=moment(_.deadline).format('YYYY/MM/DD/HH/mm');
-
-            result.push(_);
-
-        }
+        let todoId=await todoDao.selectTodayId(roomId,year,month+1,day,(date.getDay()+6)%7,page);
         
+        for(let _ of todoId){
+            if(_.isReapeat==='Y'){
 
-        let todos=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,page);
-
-        for(let _ of todos){
-            
-            if(!_.profileImg) _.profileImg="";
-            if(!_.nickname) _.nickname="";
+                let [todos]=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7);
+                if(!todos.profileImg) todos.profileImg="";
+                if(!todos.nickname) todos.nickname="";
+        
+                
+                let t=todos.deadline.split(':');
+                
+                todos.deadline=year+'/'+(month+1)+'/'+day+'/'+t[0]+'/'+t[1];
     
-            
-            let t=_.deadline.split(':');
-            
-            _.deadline=year+'/'+(month+1)+'/'+day+'/'+t[0]+'/'+t[1];
+                result.push(todos);
 
-            result.push(_);
-
+            }
+            else if(_.isReapeat==='N'){
+                let [todo]=await todoDao.selectTodayTodo(roomId,year,month+1,day);
+                if(!todo.profileImg) todo.profileImg="";
+                if(!todo.nickname) todo.nickname="";
+    
+                todo.deadline=moment(todo.deadline).format('YYYY/MM/DD/HH/mm');
+    
+                result.push(todo);
+            }
         }
-        
 
-        
 
         return res.json({
             isSuccess: true,

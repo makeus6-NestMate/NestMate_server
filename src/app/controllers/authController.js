@@ -473,7 +473,7 @@ exports.kakaoUser=async(req,res)=>{
 
     
     const {
-        email, nickname,profileImg
+        email, nickname,kakaoImg
     } = req.body;
 
     if (!email){
@@ -493,7 +493,7 @@ exports.kakaoUser=async(req,res)=>{
     }
 
     
-    if(!profileImg){
+    if(!req.file.location&&kakaoImg){
         return res.json({
             code:425,
             isSuccess:false,
@@ -553,15 +553,13 @@ exports.kakaoUser=async(req,res)=>{
             })
         }
         
-        await authDao.insertUserInfoKakao(email,nickname,profileImg);
+        await authDao.insertUserInfoKakao(email,nickname,(kakaoImg?kakaoImg:req.file.location));
 
         return res.json({
             isSuccess:true,
             message:'카카오 회원가입 성공',
             code:200
         });
-        
-      
     }
     catch(err){
         logger.error(`카카오 회원가입\n: ${JSON.stringify(err)}`);

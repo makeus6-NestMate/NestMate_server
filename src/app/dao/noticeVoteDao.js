@@ -42,29 +42,48 @@ exports.deleteNotice=(noticeId)=>{
 };
 
 
-exports.getNotice=(roomId,page)=>{
+exports.getNoticeVoteId=(roomId,page)=>{
+    const query=`
+    SELECT * 
+    FROM(
+        (SELECT Notice.id AS noticeId , null AS voteId
+        FROM Notice 
+        WHERE Notice.roomId=?) 
+        UNION 
+        (SELECT null AS noticeId , Vote.id AS voteId
+        FROM Vote 
+        WHERE Vote.roomId=?) ) A 
+    LIMIT ${page*7},7
+    `
+    const param=[roomId,roomId];
+    return fun1(query,param); 
+}
+
+
+
+
+
+exports.getNotice=(roomId,noticeId)=>{
     const query=`
     SELECT profileImg,Notice.id AS noticeId , notice , Notice.createdAt,User.id AS userId
     FROM Notice INNER JOIN User ON Notice.userId=User.id
-    WHERE Notice.roomId=?
-    LIMIT ${page*3},3
+    WHERE Notice.roomId=? AND Notice.id=?
+    
     `
-    const param=[roomId];
+    const param=[roomId,noticeId];
     return fun1(query,param); 
 };
 
 
-exports.getVote=(roomId,page)=>{
+exports.getVote=(roomId,voteId)=>{
     const query=`
     SELECT profileImg,Vote.id AS voteId , title , Vote.createdAt, isFinished,User.id AS userId
     FROM Vote INNER JOIN User ON Vote.userId=User.id
-    WHERE Vote.roomId=?
-    LIMIT ${page*4},4
+    WHERE Vote.roomId=? AND Vote.id=?
     `
-    const param=[roomId];
+    const param=[roomId,voteId];
     return fun1(query,param); 
 };
-
 
 
 exports.selectVoteChoice=(choiceId)=>{

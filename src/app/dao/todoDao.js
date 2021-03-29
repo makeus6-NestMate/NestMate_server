@@ -104,8 +104,10 @@ exports.completeTodo=(todoId,userId)=>{
     return fun1(query,param); 
 };
 
+
+
 //오늘 하루 할일 가져오기
-exports.selectTodayTodo=(roomId,year,month,day,page)=>{
+exports.selectTodayTodo=(roomId,year,month,day,todoId)=>{
     const query=`
     SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname,"N" AS "isRepeat"
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
@@ -113,15 +115,15 @@ exports.selectTodayTodo=(roomId,year,month,day,page)=>{
     (SELECT profileImg,todoId,nickname
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS completeUser
     ON TodoTime.todoId=completeUser.todoId
-    WHERE Todo.roomId=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?
-    LIMIT ${page*5},5  
+    WHERE Todo.roomId=? AND Todo.id=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?
+    
     `
-    const param=[roomId,'N',year,month,day];
+    const param=[roomId,todoId,'N',year,month,day];
     return fun1(query,param); 
 };
 
 //오늘 반복 할일 가져오기
-exports.selectTodaysTodo=(roomId,day,page)=>{
+exports.selectTodaysTodo=(roomId,day,todoId)=>{
     const query=`
     SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname,"Y" AS "isRepeat"
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
@@ -130,10 +132,37 @@ exports.selectTodaysTodo=(roomId,day,page)=>{
     (SELECT profileImg,todoId,nickname
     FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS  completeUser
     ON TodoRepeatTime.todoId=completeUser.todoId
-    WHERE Todo.roomId=? AND Todo.isRepeat=? AND TodoRepeatDay.day=?
-    LIMIT ${page*5},5
+    WHERE Todo.roomId=? AND Todo.id=? AND Todo.isRepeat=? AND TodoRepeatDay.day=?
+    
     `
-    const param=[roomId,'Y',day];
+    const param=[roomId,todoId,'Y',day];
+    return fun1(query,param); 
+};
+
+
+exports.selectTodayId=(roomId,year,month,date,day,page)=>{
+    const query=`
+    SELECT *
+    FROM (
+        (SELECT TodoTime.todoId,"N" AS "isRepeat"
+        FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
+        LEFT OUTER JOIN 
+        (SELECT profileImg,todoId,nickname
+        FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS completeUser
+        ON TodoTime.todoId=completeUser.todoId
+        WHERE Todo.roomId=? AND Todo.isRepeat=? AND YEAR(deadline)=? AND MONTH(deadline)=? AND DAY(deadline)=?)
+        UNION
+        ( SELECT TodoRepeatTime.todoId,"Y" AS "isRepeat"
+        FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
+        INNER JOIN TodoRepeatDay ON Todo.id=TodoRepeatDay.todoId
+        LEFT OUTER JOIN 
+        (SELECT profileImg,todoId,nickname
+        FROM User INNER JOIN TodoUser ON User.id=TodoUser.userId) AS  completeUser
+        ON TodoRepeatTime.todoId=completeUser.todoId
+        WHERE Todo.roomId=? AND Todo.isRepeat=? AND TodoRepeatDay.day=?)) AS A
+    LIMIT ${page*10},10;
+    `
+    const param=[roomId,'N',year,month,date,roomId,'Y',day];
     return fun1(query,param); 
 };
 

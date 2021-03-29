@@ -8,7 +8,7 @@ module.exports = function(app){
     app.post('/check/email',auth.checkEmail);
     app.post('/login',auth.signIn);
 
-    app.post('/kakao/user',auth.kakaoUser);
+    app.post('/kakao/user',upload.single('profileImg'),auth.kakaoUser);
     app.post('/kakao/login',auth.kakaoLogin);
     
 };
