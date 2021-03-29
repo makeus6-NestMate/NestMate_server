@@ -46,7 +46,23 @@ exports.verify = verify;
 
 
 
+const upload=multer({
+    storage:multer.diskStorage({
+        destination(req,file,cb){
 
+            cb(null,'./uploads/');
+
+        },
+        filename(req,file,cb){
+            cb(null,new Date().valueOf()+path.extname(file.originalname));
+        }
+    }),
+    limits:{fileSize:1024*1024*10}
+})
+exports.upload=upload;
+
+
+/*
 const upload = multer({
     storage: multerS3({
         s3: s3,
@@ -62,3 +78,4 @@ const upload = multer({
 });
 
 exports.upload=upload;
+*/

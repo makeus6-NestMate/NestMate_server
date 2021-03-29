@@ -493,7 +493,7 @@ exports.kakaoUser=async(req,res)=>{
     }
 
     
-    if(!req.file.location&&kakaoImg){
+    if(!req.file&&kakaoImg){
         return res.json({
             code:425,
             isSuccess:false,
@@ -553,7 +553,7 @@ exports.kakaoUser=async(req,res)=>{
             })
         }
         
-        await authDao.insertUserInfoKakao(email,nickname,(kakaoImg?kakaoImg:req.file.location));
+        await authDao.insertUserInfoKakao(email,nickname,(kakaoImg?kakaoImg:'https://dungi.rigingprogrammertest.site/'+req.file.filename));
 
         return res.json({
             isSuccess:true,

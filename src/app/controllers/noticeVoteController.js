@@ -928,28 +928,6 @@ exports.getNoticeVote=async(req,res)=>{
 
         }
         
-/*
-        let notice=await noticeVoteDao.getNotice(roomId,page);
-        let vote=await noticeVoteDao.getVote(roomId,page);
-        
-        for(let _ of notice){
-            let ob=_;
-            ob.isNotice='Y';
-            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
-            ob.isOwner=(userId===ob.userId?"Y":"N");
-            delete ob.userId;
-            result.push(ob);
-        }
-
-        for(let _ of vote){
-            let ob=_;
-            ob.createdAt=moment(ob.createdAt).format('YY/MM/DD/HH/mm');
-            ob.isNotice='N';
-            ob.isOwner=(userId===ob.userId?"Y":"N");
-            ob.isFinished=_.isFinished;
-            delete ob.userId;
-            result.push(ob);
-        }*/
 
 
         

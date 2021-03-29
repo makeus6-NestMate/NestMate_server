@@ -2,9 +2,13 @@ const express = require('express');
 const compression = require('compression');
 const methodOverride = require('method-override');
 var cors = require('cors');
+const path=require('path');
 
 module.exports = function () {
     const app = express();
+
+    app.use(express.static(path.join(__dirname,'public')));
+    app.use(express.static('uploads'));
 
     app.use(compression());
 

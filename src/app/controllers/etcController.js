@@ -147,8 +147,8 @@ exports.updateProfile=async(req,res)=>{
             })
         }
         let img;
-        if(!req.file||!req.file.location) img=user[0].profileImg;
-        else img=req.file.location;
+        if(!req.file) img=user[0].profileImg;
+        else img='https://dungi.rigingprogrammertest.site/'+req.file.filename;
 
         await etcDao.updateProfile(userId,nickname,img);
     

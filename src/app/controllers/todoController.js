@@ -2103,12 +2103,13 @@ exports.getTodayTodo=async(req,res)=>{
         const year=date.getFullYear(),month=date.getMonth(),day=date.getDate();
   
         
+
         let todoId=await todoDao.selectTodayId(roomId,year,month+1,day,(date.getDay()+6)%7,page);
         
         for(let _ of todoId){
             if(_.isReapeat==='Y'){
 
-                let [todos]=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7);
+                let [todos]=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,_.todoId);
                 if(!todos.profileImg) todos.profileImg="";
                 if(!todos.nickname) todos.nickname="";
         
@@ -2121,7 +2122,7 @@ exports.getTodayTodo=async(req,res)=>{
 
             }
             else if(_.isReapeat==='N'){
-                let [todo]=await todoDao.selectTodayTodo(roomId,year,month+1,day);
+                let [todo]=await todoDao.selectTodayTodo(roomId,year,month+1,day,_.todoId);
                 if(!todo.profileImg) todo.profileImg="";
                 if(!todo.nickname) todo.nickname="";
     
