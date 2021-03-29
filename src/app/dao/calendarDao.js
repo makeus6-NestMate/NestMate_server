@@ -64,8 +64,21 @@ exports.selectCalendarByDetailDate=(roomId,year,month,day,page)=>{
   const query= `
     SELECT category,time,categoryIdx,title,content,id AS calendarId
     FROM Calendar
-    WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=? 
+    WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=?
+    ORDER BY Calendar.id
     LIMIT ${page*7},7
+  `;
+  const param=[roomId,year,month,day];
+
+  return fun1(query,param);
+}
+
+
+exports.selectCalendarByDetailDateCount=(roomId,year,month,day,page)=>{
+  const query= `
+    SELECT COUNT(*) AS cnt
+    FROM Calendar
+    WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=? 
   `;
   const param=[roomId,year,month,day];
 

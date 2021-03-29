@@ -688,6 +688,8 @@ exports.getDetailCalendar=async(req,res)=>{
 
         const calendar=await calendarDao.selectCalendarByDetailDate(roomId,Number(date[0]),Number(date[1]),Number(date[2]),page);
 
+        const [calendarCount]=await calendarDao.selectCalendarByDetailDateCount(roomId,Number(date[0]),Number(date[1]),Number(date[2]));
+
 
         for(let _ of calendar){
             _.time=moment(_.time).format('YYYY/MM/DD/HH/mm');
@@ -698,7 +700,8 @@ exports.getDetailCalendar=async(req,res)=>{
             code: 200,
             message: "일정 상세 조회 성공",
             result:{
-                calendar:calendar
+                calendar:calendar,
+                calendarCnt:calendarCount.cnt
             }
         });
 
