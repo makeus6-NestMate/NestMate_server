@@ -493,7 +493,7 @@ exports.kakaoUser=async(req,res)=>{
     }
 
     
-    if(!req.file&&kakaoImg){
+    if(!req.file&&!kakaoImg){
         return res.json({
             code:425,
             isSuccess:false,
