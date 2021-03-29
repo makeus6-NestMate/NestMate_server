@@ -517,7 +517,7 @@ exports.kakaoUser=async(req,res)=>{
         })
     }
 
-    const accessToken=req.headers.access_token;
+    const accessToken=req.body.access_token;
 
     const options={
         uri:"https://kapi.kakao.com/v2/user/me",
@@ -601,7 +601,7 @@ exports.kakaoLogin=async(req,res)=>{
     }
 
 
-    const accessToken=req.headers.access_token;
+    const accessToken=req.body.access_token;
 
     const options={
         uri:"https://kapi.kakao.com/v2/user/me",
