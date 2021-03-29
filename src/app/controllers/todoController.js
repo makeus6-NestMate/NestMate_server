@@ -2107,8 +2107,7 @@ exports.getTodayTodo=async(req,res)=>{
         let todoId=await todoDao.selectTodayId(roomId,year,month+1,day,(date.getDay()+6)%7,page);
         
         for(let _ of todoId){
-            if(_.isReapeat==='Y'){
-
+            if(_.isRepeat==='Y'){
                 let [todos]=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,_.todoId);
                 if(!todos.profileImg) todos.profileImg="";
                 if(!todos.nickname) todos.nickname="";
@@ -2121,7 +2120,8 @@ exports.getTodayTodo=async(req,res)=>{
                 result.push(todos);
 
             }
-            else if(_.isReapeat==='N'){
+            else if(_.isRepeat==='N'){
+                
                 let [todo]=await todoDao.selectTodayTodo(roomId,year,month+1,day,_.todoId);
                 if(!todo.profileImg) todo.profileImg="";
                 if(!todo.nickname) todo.nickname="";

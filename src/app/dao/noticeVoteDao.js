@@ -44,7 +44,7 @@ exports.deleteNotice=(noticeId)=>{
 
 exports.getNoticeVoteId=(roomId,page)=>{
     const query=`
-    SELECT * 
+    SELECT *
     FROM(
         (SELECT Notice.id AS noticeId , null AS voteId
         FROM Notice 
