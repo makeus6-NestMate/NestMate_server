@@ -202,7 +202,8 @@ exports.getMemo=async(req,res)=>{
 
         for(let _ of memo){
            
-
+            _.isOwner=(_.userId===userId?"Y":"N");
+            delete _.userId;
             _.createdAt=moment(_.createdAt).format('MM/DD/HH/mm');
         }
 
@@ -603,13 +604,7 @@ exports.moveMemo=async(req,res)=>{
                 code:460
             })
         }
-        if(memo[0].userId!=userId){
-            return res.json({
-                isSuccess:false,
-                message:'권한이 없습니다',
-                code:458
-            })
-        }
+
 
         await memoDao.moveMemo(memoId,x,y);
 
