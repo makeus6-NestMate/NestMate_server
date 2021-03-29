@@ -66,7 +66,7 @@ exports.selectCalendarByDetailDate=(roomId,year,month,day,page)=>{
     FROM Calendar
     WHERE roomId=? AND YEAR(time)=? AND MONTH(time)=? AND DAY(time)=?
     ORDER BY Calendar.id
-    LIMIT ${page*4},4
+    LIMIT ${page*7},7
   `;
   const param=[roomId,year,month,day];
 
