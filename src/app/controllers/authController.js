@@ -493,13 +493,7 @@ exports.kakaoUser=async(req,res)=>{
     }
 
     
-    if(!req.file&&!kakaoImg){
-        return res.json({
-            code:425,
-            isSuccess:false,
-            message:'사진을 입력해주세요'
-        })
-    }
+ 
 
     if(!nickname){
         return res.json({
