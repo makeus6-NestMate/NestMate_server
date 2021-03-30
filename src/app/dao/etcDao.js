@@ -65,7 +65,7 @@ exports.selectAlarm=(userId,roomId,page)=>{
         INNER JOIN RoomUser ON RoomUser.userId=User.id
         WHERE RoomUser.roomId=? AND User.id=?) Send
         ON User.id=Send.senderId
-        ORDER BY Send.id
+        ORDER BY Send.id DESC
         LIMIT ${page*10},10
     `
     const param=[roomId,userId];
