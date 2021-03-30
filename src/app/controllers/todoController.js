@@ -445,7 +445,8 @@ exports.getDayTodo=async(req,res)=>{
         let todo=await todoDao.selectDayTodo(roomId,page);
 
         for(let _ of todo){
-          
+            _.isOwner=(_.userId===userId?'Y':'N');
+            delete _.userId;
             _.deadline=moment(_.deadline).format('MM/DD/HH/mm');
         }
 
@@ -549,6 +550,8 @@ exports.getDaysTodo=async(req,res)=>{
 
         for(let _ of todo){
             
+            _.isOwner=(_.userId===userId?'Y':'N');
+            delete _.userId;
     
             let time=_.deadline.split(':');
             _.deadline=time[0]+'/'+time[1];
@@ -2111,8 +2114,7 @@ exports.getTodayTodo=async(req,res)=>{
                 let [todos]=await todoDao.selectTodaysTodo(roomId,(date.getDay()+6)%7,_.todoId);
                 if(!todos.profileImg) todos.profileImg="";
                 if(!todos.nickname) todos.nickname="";
-                todos.isOwner=(todos.userId===userId?'Y':'N');
-                delete todos.userId;
+            
         
                 
                 let t=todos.deadline.split(':');
@@ -2127,8 +2129,7 @@ exports.getTodayTodo=async(req,res)=>{
                 let [todo]=await todoDao.selectTodayTodo(roomId,year,month+1,day,_.todoId);
                 if(!todo.profileImg) todo.profileImg="";
                 if(!todo.nickname) todo.nickname="";
-                todo.isOwner=(todo.userId===userId?'Y':'N');
-                delete todo.userId;
+                
 
                 todo.deadline=moment(todo.deadline).format('YYYY/MM/DD/HH/mm');
     

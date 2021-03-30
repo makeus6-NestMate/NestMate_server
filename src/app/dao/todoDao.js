@@ -3,7 +3,7 @@ const {fun1}=require('../../../config/functions');
 // 마감일이 지나지않고 완료 안된 하루 할일 조회
 exports.selectDayTodo=(roomId,page)=>{
     const query=`
-    SELECT Todo.id AS todoId,todo,deadline
+    SELECT Todo.id AS todoId,todo,deadline,Todo.userId
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId
     LEFT OUTER JOIN TodoUser ON Todo.id=TodoUser.todoId
     WHERE Todo.roomId=? AND isRepeat=? AND deadline>=NOW() AND TodoUser.userId is null
@@ -29,7 +29,7 @@ exports.selectDaySearch=(roomId,keyword,page)=>{
 //  반복 할일 조회
 exports.selectDaysTodo=(roomId,page)=>{
     const query=`
-    SELECT Todo.id AS todoId,todo,deadline
+    SELECT Todo.id AS todoId,todo,deadline,Todo.userId
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     WHERE Todo.roomId=? AND isRepeat=?
     LIMIT ${page*10},10 
@@ -109,7 +109,7 @@ exports.completeTodo=(todoId,userId)=>{
 //오늘 하루 할일 가져오기
 exports.selectTodayTodo=(roomId,year,month,day,todoId)=>{
     const query=`
-    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname,"N" AS "isRepeat",Todo.userId
+    SELECT TodoTime.todoId,todo,deadline,completeUser.profileImg,todo,completeUser.nickname,"N" AS "isRepeat"
     FROM Todo INNER JOIN TodoTime ON Todo.id=TodoTime.todoId 
     LEFT OUTER JOIN 
     (SELECT profileImg,todoId,nickname
@@ -125,7 +125,7 @@ exports.selectTodayTodo=(roomId,year,month,day,todoId)=>{
 //오늘 반복 할일 가져오기
 exports.selectTodaysTodo=(roomId,day,todoId)=>{
     const query=`
-    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname,"Y" AS "isRepeat",Todo.userId
+    SELECT TodoRepeatTime.todoId,TodoRepeatTime.deadline,completeUser.profileImg,todo,completeUser.nickname,"Y" AS "isRepeat"
     FROM Todo INNER JOIN TodoRepeatTime ON Todo.id=TodoRepeatTime.todoId
     INNER JOIN TodoRepeatDay ON Todo.id=TodoRepeatDay.todoId
     LEFT OUTER JOIN 
