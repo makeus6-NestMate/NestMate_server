@@ -41,7 +41,7 @@ exports.deleteRule=(ruleId)=>{
 
 exports.selectRule=(roomId)=>{
     const query= `
-      SELECT rule , id AS ruleId FROM Rule WHERE roomId=? ORDER BY id;
+      SELECT rule , id AS ruleId,userId FROM Rule WHERE roomId=? ORDER BY id;
     `;
     const param=[roomId];
   

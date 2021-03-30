@@ -401,6 +401,9 @@ exports.getRule=async(req,res)=>{
 
         const rule=await ruleDao.selectRule(roomId);
 
+        for(let _ of rule){
+            _.isOwner=(_.userId===userId?'Y':'N');
+        }
     
 
         

@@ -413,7 +413,8 @@ exports.getAlarm=async(req,res)=>{
             })
         }
 
-        const alarm=await etcDao.selectAlarm(userId,roomId,page); 
+        const alarm=await etcDao.selectAlarm(userId,roomId,page);
+        const [alarmCount]=await etcDao.selectAlarmCount(userId,roomId);
         
         for(let _ of alarm){
             _.createdAt=moment(_.createdAt).format('YYYY/MM/DD/HH/mm');
@@ -425,6 +426,7 @@ exports.getAlarm=async(req,res)=>{
             code: 200,
             message: "알림 조회 성공",
             result:{
+                alarmCnt:alarmCount.alarmCnt,
                 alarm:alarm
             }
         });

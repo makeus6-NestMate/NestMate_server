@@ -72,6 +72,17 @@ exports.selectAlarm=(userId,roomId,page)=>{
     return fun1(query,param); 
 };
 
+exports.selectAlarmCount=(userId,roomId)=>{
+    const query=`
+        SELECT COUNT(*) AS alarmCnt
+        FROM Alarm INNER JOIN User ON Alarm.receiverId=User.id
+        INNER JOIN RoomUser ON RoomUser.userId=User.id
+        WHERE RoomUser.roomId=? AND User.id=?
+    `
+    const param=[roomId,userId];
+    return fun1(query,param); 
+};
+
 
 
 exports.selectAllRoom=()=>{
